@@ -19,11 +19,11 @@ test('CLI-ZIP64 wird verlustfrei normalisiert; Entpackgrenzen verhindern übergr
 });
 test('Offline-Paket: CLI-Basis erhalten, Exportarchive bytegleich kopieren und XL-Manifest registrieren',async()=>{
   const before=unzipSync(base);const result=await personalize(base,[input],1);const after=unzipSync(result.bytes);
-  assert.equal(result.version,'1.0.1.1');
+  assert.equal(result.version,version+'.1');
   assert.deepEqual(after[root+'profiles/BBB-type2.streamDeckProfile'],original);
   assert.deepEqual(original,unzipSync(result.bytes)[root+'profiles/BBB-type2.streamDeckProfile']);
   for(const [name,bytes] of Object.entries(before))if(!name.endsWith('/manifest.json')&&!name.endsWith('/profiles/catalog.json'))assert.deepEqual(after[name],bytes,name);
-  const manifest=JSON.parse(strFromU8(after[root+'manifest.json']));assert.equal(manifest.Version,'1.0.1.1');
+  const manifest=JSON.parse(strFromU8(after[root+'manifest.json']));assert.equal(manifest.Version,version+'.1');
   assert.deepEqual(manifest.Profiles,[{Name:'profiles/BBB-type2',DeviceType:2,Readonly:false,AutoInstall:true,DontAutoSwitchWhenInstalled:true}]);
   const catalog=JSON.parse(strFromU8(after[root+'profiles/catalog.json']));assert.equal(catalog[0].key,'BBB');assert.match(catalog[0].sha256,/^[a-f0-9]{64}$/);
 });

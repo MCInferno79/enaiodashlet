@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Controller, type Device } from "./controller";
 import { createBridge, type Credentials } from "./server";
 import type { Profile } from "../shared/config";
+import { inspectorMessages } from "./inspector";
 streamDeck.logger.setLevel("error");
 
 const pluginRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -34,7 +35,13 @@ const state = await readJson(path.join(dataRoot, "state.json"), { paused: false 
 await controller.setPaused(state.paused === true);
 const bridge = createBridge({ controller, profiles, devices, credentials: stored,
   saveCredentials: c => atomic("pairing.json", c), savePaused: p => atomic("state.json", { paused: p }) });
-async function notify() { await streamDeck.ui.sendToPropertyInspector(JSON.parse(JSON.stringify(bridge.status()))); }
+const status = () => ({ ...bridge.status(), pluginVersion: streamDeck.info.plugin.version, streamDeckVersion: streamDeck.info.application.version, localServerReady: bridge.server.listening });
+const inspector = inspectorMessages({
+  isVisible: context => streamDeck.ui.action?.id === context,
+  send: payload => streamDeck.ui.sendToPropertyInspector(JSON.parse(JSON.stringify(payload))),
+  status, beginPairing: () => bridge.beginPairing(), isServerReady: () => bridge.server.listening, log
+});
+async function notify() { await streamDeck.ui.sendToPropertyInspector(JSON.parse(JSON.stringify(status()))); }
 
 @action({ UUID: "de.heki.autoprofile.control" })
 class Control extends SingletonAction {
@@ -45,13 +52,9 @@ class Control extends SingletonAction {
     await notify();
   }
   override async onSendToPlugin(ev: SendToPluginEvent<any, any>) {
-    const p = ev.payload;
-    if (p && typeof p === "object" && !Array.isArray(p) && p.command === "pair") {
-      const pairing = bridge.beginPairing();
-      await streamDeck.ui.sendToPropertyInspector({ pairingCode: pairing.code, expires: pairing.expires });
-    } else await notify();
+    await inspector.receive(ev.action.id, ev.payload);
   }
-  override async onPropertyInspectorDidAppear() { await notify(); }
+  override async onPropertyInspectorDidAppear(ev: { action: { id: string } }) { await inspector.didAppear(ev.action.id); }
 }
 streamDeck.actions.registerAction(new Control());
 streamDeck.devices.onDeviceDidConnect(() => { void controller.reconcile().catch(() => log("DEVICE_RECONCILE_FAILED")); });
@@ -66,6 +69,12 @@ process.on("unhandledRejection", () => { log("UNHANDLED_REJECTION"); void contro
 await streamDeck.connect();
 let retryDelay = 1000;
 while (!shuttingDown) {
-  try { await bridge.listen(); log("START"); break; }
-  catch { log("LOCAL_PORT_UNAVAILABLE"); await streamDeck.ui.sendToPropertyInspector({ error: "Lokaler Port 29381 nicht verfügbar. Automatischer Wiederholungsversuch folgt." }); await new Promise(resolve => setTimeout(resolve, retryDelay)); retryDelay = Math.min(retryDelay * 2, 30000); }
+  try { await bridge.listen(); }
+  catch {
+    log("LOCAL_PORT_UNAVAILABLE");
+    await streamDeck.ui.sendToPropertyInspector({ ...status(), error: "Lokaler Port 29381 nicht verfügbar. Automatischer Wiederholungsversuch folgt." }).catch(() => log("PI_NOTIFY_FAILED"));
+    await new Promise(resolve => setTimeout(resolve, retryDelay)); retryDelay = Math.min(retryDelay * 2, 30000);
+    continue;
+  }
+  log("START"); await notify().catch(() => log("PI_NOTIFY_FAILED")); break;
 }

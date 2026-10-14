@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "HeKI Stream Deck Auto Profile Switcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Schaltet lokale Stream-Deck-Plugin-Profile anhand des aktiven Edge-Tabs um.",
   "minimum_chrome_version": "120",
   "permissions": [

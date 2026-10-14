@@ -20,6 +20,24 @@
 | Lokaler Netzwerkzugriff blockiert | Browsermeldung und Edge-Richtlinien zur lokalen Kommunikation prüfen; für diese Erweiterung entsprechend IT-Vorgaben freigeben. Keine globalen Sicherheitsfunktionen abschalten. |
 | Grafana-Aktion funktioniert nicht | Ursprüngliches Grafana-Plugin installiert lassen. Dessen Anmeldung/globalen Settings unabhängig vom Profilexport prüfen. HeKI verändert sie nicht. |
 
+## Kein Kopplungscode (ab 1.0.2)
+
+Die Aktion **„Automatik / Kopplung“ mit der Maus im Stream-Deck-Editor auswählen**. Der Kopplungsbutton steht unten im Einstellungsbereich; ein Druck auf die physische Taste pausiert nur die Automatik. Der Code erscheint im Textfeld direkt unter dem Button.
+
+| Anzeige | Bedeutung / nächster Schritt |
+|---|---|
+| PI00 | Stream Deck hat die Oberfläche nicht mit gültigen Startdaten verbunden. Aktion erneut auswählen; die Inspector-HTML nicht außerhalb von Stream Deck öffnen. |
+| PI01 | Verbindungsaufbau oder Anfrage läuft. Nach spätestens fünf Sekunden folgt bei fehlender Antwort PI02/PI03. |
+| PI02 | SDK-WebSocket geschlossen oder nicht erreichbar. Drei automatische Wiederverbindungen; danach „Verbindung erneut prüfen“ oder Stream Deck vollständig beenden und neu starten. |
+| PI03 | Stream Deck ist verbunden, das Plugin hat die angeforderte Antwort nicht innerhalb von fünf Sekunden geliefert. Vollständig neu starten, Versionszeile und lokale Ereigniscodes prüfen. |
+| PI04 | Konkreter Dienst-/Pluginfehler. Den angezeigten Text beachten. Bei Port 29381 auf Konflikte prüfen. |
+| PI10 | Plugin bereit oder Code erfolgreich angezeigt. Maßgeblich ist der Text und das Codefeld. |
+| PI11 | Code nach zwei Minuten aus dem Feld entfernt; bei Bedarf erneut erzeugen. |
+
+Die Diagnosezeile nennt Oberfläche, tatsächlich vom Host gemeldete Pluginversion, Stream-Deck-Version und Verbindungszustand. Ein neues persönliches Paket muss mit der **neuen** Profilvorbereitung erzeugt werden; eine alte heruntergeladene HTML-Datei enthält weiterhin den alten Pluginstand. Stream Deck nach dem Update vollständig beenden und neu starten. Zum Support zuerst nur Status- und Versionszeile melden, keinen Code oder Token.
+
+In `service.log` bedeutet `PI_PAIR_REQUEST`, dass die Anfrage im Plugin eingetroffen ist. `PI_REPLY_SENT` bestätigt die Übergabe an das SDK, noch keine Anzeige im Browser. `PI_REPLY_DEFERRED` bedeutet, dass der Einstellungsbereich laut SDK noch nicht sichtbar war; die Antwort wird beim Erscheinen nachgeliefert. `PI_COMMAND_FAILED` bezeichnet einen abgefangenen internen Fehler. Es werden keine Payloads, Codes oder Tokens protokolliert.
+
 ## Profilvorbereitung und Installation
 
 - Keine separate Node-Installation nötig: `Profile-Paket-erstellen.html` in Edge öffnen oder die Seite über den Link in den Erweiterungseinstellungen aufrufen. Die CMD-Datei `Profile-einbinden.cmd` öffnet jetzt lediglich diese Seite.
@@ -55,6 +73,7 @@ Für einen UI-Test ist ein verfügbarer Chromium-Testbrowser erforderlich. Beisp
 ```cmd
 set "HEKI_BROWSER_PATH=C:\FreigegebeneTools\Chromium\chrome.exe"
 npm run test:ui
+npm run test:inspector
 npm run test:browser
 ```
 

@@ -3,7 +3,7 @@
   "UUID": "de.heki.autoprofile",
   "Name": "HeKI Auto Profile",
   "Author": "HeKI",
-  "Version": "1.0.1.0",
+  "Version": "1.0.2.0",
   "Description": "Lokaler URL-basierter Profilwechsel für Microsoft Edge.",
   "Category": "HeKI Auto Profile",
   "CategoryIcon": "assets/category",

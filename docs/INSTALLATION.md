@@ -30,7 +30,7 @@ Keine künstlich generierten Profile verwenden. Exportarchive werden als unverä
 2. Kennung `BBB` und Gerätetyp `Stream Deck XL · 32 Tasten` beibehalten. Anzeigename frei wählbar.
 3. Weitere Exporte bei Bedarf unter `HeKI`, `Grafana`, `Speakr`, `Standard` auswählen; andere Zeilen leer lassen. Zusätzliche Kennungen über „Weiteres Profil“ ergänzen. Der Administrator wählt den zum Export passenden Gerätetyp; im Betrieb prüft das SDK den tatsächlichen Typ. Keine Typerkennung über das undokumentierte Archivinnere.
 4. Beim ersten Paket Revision `1` verwenden. Für Änderungen eine höhere Revision als beim zuletzt installierten Paket wählen. Die Seite merkt sich nur diese Zahl, niemals Profilinhalte.
-5. „Installationspaket erstellen“, dann „Paket herunterladen“. Ergebnis zum Beispiel: `HeKI-AutoProfile-1.0.1.1.streamDeckPlugin`.
+5. „Installationspaket erstellen“, dann „Paket herunterladen“. Ergebnis zum Beispiel: `HeKI-AutoProfile-1.0.2.1.streamDeckPlugin`.
 
 Höchstens 32 Exporte, bis 50 MiB je Datei und 100 MiB insgesamt. Dateien bleiben lokal und werden bytegleich kopiert. Das persönliche Paket kann vertrauliche Settings enthalten: nicht öffentlich auf GitHub oder in Tickets hochladen.
 
@@ -42,7 +42,7 @@ Höchstens 32 Exporte, bis 50 MiB je Datei und 100 MiB insgesamt. Dateien bleibe
 4. In Stream Deck ein **neues** Einrichtungsprofil erstellen. Die Aktion „HeKI Auto Profile → Automatik / Kopplung“ darauf platzieren und auswählen.
 5. Einen Kopplungscode im Einstellungsbereich erzeugen; er gilt zwei Minuten.
 
-Keine CMD-Datei und kein manueller Kopiervorgang in den Pluginordner erforderlich. Das beiliegende `HeKI-AutoProfile-1.0.1-Basis.streamDeckPlugin` wurde mit der offiziellen CLI erstellt. Es dient zur Installation/Verbindungsprüfung **ohne persönliche Profile**. Für BBB das persönliche Paket verwenden; die Basis nicht anschließend darüberinstallieren.
+Keine CMD-Datei und kein manueller Kopiervorgang in den Pluginordner erforderlich. Das beiliegende `HeKI-AutoProfile-1.0.2-Basis.streamDeckPlugin` wurde mit der offiziellen CLI erstellt. Es dient zur Installation/Verbindungsprüfung **ohne persönliche Profile**. Für BBB das persönliche Paket verwenden; die Basis nicht anschließend darüberinstallieren.
 
 Dies ist ein lokal verteiltes Plugin ohne Marketplace-Prüfung und Marketplace-DRM. Die öffentliche Plugin-API und die von Stream Deck verwaltete Laufzeit bleiben dieselben.
 
@@ -64,3 +64,9 @@ Neutrales Startprofil im Host anzeigen, Edge fokussieren und BBB öffnen. Das ec
 Die Anzeige meldet „Profilbefehl gesendet“, weil die SDK-Promise keine Hardwarebestätigung liefert. Alle weiteren Fälle und kritischen Grenzen stehen im Hardware-Abnahmeprotokoll.
 
 Der Hintergrundendpunkt startet im Plugin-Einstiegspunkt. Ob der Host nach Neustart ohne sichtbare Aktion zuverlässig startet, ist auf der verwendeten Version zu prüfen. Alternative: **eigenes neues Startprofil** mit Steueraktion. Die Taste muss für automatische Wechsel nicht gedrückt werden. `Plugin-starten.cmd` sendet einen offiziellen passiven Deep-Link zur Diagnose, garantiert aber keinen universellen Autostart.
+
+## Update auf 1.0.2 bei fehlendem Kopplungscode
+
+Neues ZIP vollständig in einen eigenen Ordner entpacken. Mit dessen `Profile-Paket-erstellen.html` alle bisherigen persönlichen Exportprofile erneut auswählen und ein neues persönliches Paket erzeugen. Dieses Paket per Doppelklick über Stream Deck installieren. Der Basisinstaller enthält keine persönlichen Profile und ersetzt das persönliche Paket daher nicht.
+
+Stream Deck vollständig über das Symbol im Infobereich beenden, neu starten und die Aktion „Automatik / Kopplung“ im Editor auswählen. Die Oberfläche muss Version 1.0.2 zeigen; die Pluginversion beginnt mit 1.0.2. Auf „Neuen Kopplungscode erzeugen“ klicken. Bei weiterhin leerem Feld die PI-Statusmeldung und Versionszeile aus der [Fehlersuche](FEHLERSUCHE.md) verwenden.

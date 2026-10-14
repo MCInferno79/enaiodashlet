@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+const {version}=JSON.parse(await readFile('package.json','utf8'));
 await mkdir('work',{recursive:true});const temp=await mkdtemp(path.resolve('work/packager-browser-'));let context;
 const server=http.createServer(async(req,res)=>{const file=req.url==='/'?'Profile-Paket-erstellen.html':req.url.slice(1);if(!['Profile-Paket-erstellen.html','profile-packager.js','profile-packager.css','profile-packager.js.LEGAL.txt'].includes(file)){res.writeHead(404);return res.end();}res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript'});res.end(await readFile('dist/no-node/'+file));});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port;
@@ -22,7 +23,7 @@ try{
   await page.locator('#revision').fill('1');await page.locator('#build').click();
   try{await page.locator('#download').waitFor();}catch{throw new Error('Paketoberfläche: '+await page.locator('#status').textContent());}
   const downloadPromise=page.waitForEvent('download');await page.locator('#download').click();const download=await downloadPromise;
-  assert.equal(download.suggestedFilename(),'HeKI-AutoProfile-1.0.1.1.streamDeckPlugin');
+  assert.equal(download.suggestedFilename(),`HeKI-AutoProfile-${version}.1.streamDeckPlugin`);
   const filename=temp+'/personalized.streamDeckPlugin';await download.saveAs(filename);
   const unpacked=unzipSync(new Uint8Array(await readFile(filename)));
   assert.deepEqual(unpacked['de.heki.autoprofile.sdPlugin/profiles/BBB-type2.streamDeckProfile'],profile);
