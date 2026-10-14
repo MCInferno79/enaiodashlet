@@ -13,7 +13,7 @@ const root = temp + '/de.heki.autoprofile.sdPlugin';
 await cp('dist/de.heki.autoprofile.sdPlugin', root, { recursive: true });
 const manifest = JSON.parse(await readFile(root + '/manifest.json', 'utf8'));
 const action = 'de.heki.autoprofile.control', contextId = 'selected-action';
-const info = { application: { version: '7.3.0', platform: 'windows', platformVersion: '10', language: 'de', font: 'Segoe UI' }, plugin: { uuid: 'de.heki.autoprofile', version: manifest.Version }, devicePixelRatio: 1, colors: {}, devices: [{ id: 'XL', type: 2, name: 'Stream Deck XL', size: { columns: 8, rows: 4 } }] };
+const info = { application: { version: '7.5.1.22901', platform: 'windows', platformVersion: '10', language: 'de', font: 'Segoe UI' }, plugin: { uuid: 'de.heki.autoprofile', version: manifest.Version }, devicePixelRatio: 1, colors: {}, devices: [{ id: 'XL', type: 2, name: 'Stream Deck XL', size: { columns: 8, rows: 4 } }] };
 const host = new WebSocketServer({ host: '127.0.0.1', port: 0 }); await new Promise(r => host.once('listening', r));
 let pluginSocket, inspectorSocket, registered = false, dropPairing = false, browser, child;
 const routingErrors = [];
@@ -24,9 +24,9 @@ host.on('connection', socket => socket.on('message', data => {
     if (message.event === 'registerPlugin') { pluginSocket = socket; registered = true; return; }
     if (message.event === 'registerPropertyInspector') { assert.equal(message.uuid, 'inspector-uuid'); inspectorSocket = socket; return; }
     if (socket === inspectorSocket && message.event === 'sendToPlugin') {
-      assert.equal(message.context, contextId); assert.equal(message.action, action);
-      if (!(dropPairing && message.payload.command === 'pair')) sendPlugin({ ...message, device: 'XL' });
-    } else if (socket === pluginSocket && message.event === 'sendToPropertyInspector' && inspectorSocket) inspectorSocket.send(JSON.stringify(message));
+      assert.equal(message.context, 'inspector-uuid'); assert.equal(message.action, action);
+      if (!(dropPairing && message.payload.command === 'pair')) sendPlugin({ ...message, context: contextId });
+    } else if (socket === pluginSocket && message.event === 'sendToPropertyInspector' && inspectorSocket) inspectorSocket.send(JSON.stringify({ ...message, action, context: 'inspector-uuid' }));
   } catch (error) { routingErrors.push(error.message); }
 }));
 const web = http.createServer(async (req, res) => {
@@ -44,16 +44,16 @@ try {
   const log = () => readFile(temp + '/data/service.log', 'utf8').catch(() => '');
   await until(async () => (await log()).includes('START'));
   sendPlugin({ event: 'willAppear', action, context: contextId, device: 'XL', payload: { controller: 'Keypad', coordinates: { column: 0, row: 0 }, settings: {}, isInMultiAction: false } });
-  browser = await chromium.launchPersistentContext(temp + '/browser', { executablePath: process.env.HEKI_BROWSER_PATH ?? '/usr/bin/chromium', headless: true, viewport: { width: 550, height: 750 }, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  browser = await chromium.launchPersistentContext(temp + '/browser', { executablePath: process.env.HEKI_BROWSER_PATH ?? '/usr/bin/chromium', headless: true, viewport: { width: 340, height: 540 }, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   browser.setDefaultTimeout(8000);
   const page = await browser.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:' + web.address().port);
   await page.evaluate(({ port, info, action, contextId }) => window.connectElgatoStreamDeckSocket(String(port), 'inspector-uuid', 'registerPropertyInspector', JSON.stringify(info), JSON.stringify({ action, context: contextId })), { port: host.address().port, info, action, contextId });
   // Request arrives before propertyInspectorDidAppear: the SDK initially has no visible UI.
   await until(async () => (await log()).includes('PI_REPLY_DEFERRED'));
-  assert.equal(await page.locator('#pair').isDisabled(), true);
+  assert.equal(await page.locator('#pair').isDisabled(), false);
   sendPlugin({ event: 'propertyInspectorDidAppear', action, context: contextId, device: 'XL' });
-  await page.waitForFunction(() => !document.querySelector('#pair').disabled);
+  await page.locator('#state').filter({ hasText: 'PI10:' }).waitFor();
   await page.locator('#pair').click();
   await page.waitForFunction(() => /^[a-f0-9]{48}$/.test(document.querySelector('#code').value));
   const code = await page.locator('#code').inputValue();
@@ -62,11 +62,20 @@ try {
   dropPairing = true; await page.locator('#pair').click();
   await page.locator('#state').filter({ hasText: 'PI03:' }).waitFor();
   assert.equal(await page.locator('#code').inputValue(), '');
+  assert.equal(await page.locator('#pair').isDisabled(), false);
+  assert.match(await page.locator('#diagnostic').textContent(), /Lokaler Dienst: bereit/);
   assert.match(await page.locator('#diagnostic').textContent(), new RegExp(manifest.Version.replaceAll('.', '\\.')));
   await page.screenshot({ path: 'work/inspector-diagnostic-preview.png', fullPage: true });
+  // Retry without restarting the page or plugin; the button must recover.
+  dropPairing = false; await page.locator('#pair').click();
+  await page.waitForFunction(() => /^[a-f0-9]{48}$/.test(document.querySelector('#code').value));
+  assert.equal(await page.locator('#pair').isDisabled(), false);
+  const retryCode = await page.locator('#code').inputValue();
+  const retryResponse = await fetch('http://127.0.0.1:29381/v1/pair', { method: 'POST', headers: { Origin: 'chrome-extension://' + 'a'.repeat(32), 'Content-Type': 'application/json' }, body: JSON.stringify({ code: retryCode }) });
+  assert.equal(retryResponse.status, 200);
   const events = await log(); assert(events.includes('PI_PAIR_REQUEST')); assert(!events.includes(code)); assert(!events.includes(auth.token));
   assert.deepEqual(errors, []); assert.deepEqual(routingErrors, []);
-  console.log('Kopplungsprüfung bestanden: echte Chromium-Oberfläche → WebSocket → offizielles SDK → angezeigter Code → erfolgreiches lokales Pairing. Frühe Antwort und ausbleibende Code-Antwort geprüft; Stream-Deck-Host simuliert.');
+  console.log('Kopplungsprüfung bestanden: echte Chromium-Oberfläche → WebSocket → offizielles SDK → angezeigter Code → erfolgreiches lokales Pairing. Frühe Antwort, UI-Kennungsrouting, Timeout und erfolgreicher zweiter Klick ohne Neustart geprüft; Stream-Deck-Host simuliert.');
 } finally {
   if (browser) await browser.close();
   if (child?.exitCode === null) { child.kill(); await Promise.race([new Promise(r => child.once('exit', r)), new Promise(r => setTimeout(r, 1000))]); if (child.exitCode === null) child.kill('SIGKILL'); }

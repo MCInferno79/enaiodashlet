@@ -1,5 +1,5 @@
 (() => {
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
   const ACTION = 'de.heki.autoprofile.control';
   const pair = document.querySelector('#pair');
   const code = document.querySelector('#code');
@@ -22,25 +22,23 @@
       show('PI02', 'Keine Verbindung zu Stream Deck. „Verbindung erneut prüfen“ wählen.');
       return;
     }
-    if (command === 'pair' && !backendReady) {
-      show('PI04', 'Das Plugin ist noch nicht bereit. Zuerst die Verbindung erneut prüfen.');
-      return;
-    }
     const requestId = `pi-${Date.now()}-${++serial}`;
     if (command === 'pair') { clearPending(); clearCode(); pair.disabled = true; show('PI01', 'Kopplungscode wird angefordert …'); }
     const timer = setTimeout(() => {
-      pending.delete(requestId); backendReady = false; pair.disabled = true; diagnostics();
-      show('PI03', 'Stream Deck ist verbunden, aber das HeKI-Plugin antwortet nicht. Stream Deck vollständig beenden und neu starten. Danach diese Aktion erneut auswählen.');
+      pending.delete(requestId); pair.disabled = false; diagnostics();
+      show('PI03', 'Keine Antwort auf die Anfrage. Der Button ist wieder frei: erneut versuchen oder „Verbindung erneut prüfen“ wählen.');
     }, 5000);
     pending.set(requestId, { command, timer });
-    try { socket.send(JSON.stringify({ action: ACTION, event: 'sendToPlugin', context: parameters.context, payload: { command, requestId } })); }
+    // The host routes UI commands by the registered UI UUID, then forwards the
+    // action context to the plugin. This matches the recommended sdpi client.
+    try { socket.send(JSON.stringify({ action: parameters.action, event: 'sendToPlugin', context: parameters.uuid, payload: { command, requestId } })); }
     catch { clearTimeout(timer); pending.delete(requestId); disconnected(socket); }
   }
   function disconnected(current) {
     if (socket !== current || current.hekiFailed) return;
     current.hekiFailed = true;
     clearTimeout(connectTimer); clearTimeout(pollTimer); clearPending(); clearCode();
-    backendReady = false; pair.disabled = true; diagnostics();
+    backendReady = false; pair.disabled = false; diagnostics();
     try { current.close(); } catch { /* already closed */ }
     if (attempt < 3) {
       const delay = 1000 * 2 ** attempt++;
@@ -50,7 +48,7 @@
   }
   function receive(event) {
     let message; try { message = JSON.parse(event.data); } catch { return; }
-    if (message.event !== 'sendToPropertyInspector' || message.context !== parameters.context) return;
+    if (message.event !== 'sendToPropertyInspector' || ![parameters.context, parameters.uuid].includes(message.context) || (message.action && message.action !== parameters.action)) return;
     const p = message.payload;
     if (!p || typeof p !== 'object' || Array.isArray(p)) return;
     const request = pending.get(p.requestId);
@@ -62,7 +60,7 @@
     if (typeof p.localServerReady === 'boolean') backendReady = p.localServerReady;
     diagnostics();
     const pairingPending = [...pending.values()].some(r => r.command === 'pair');
-    pair.disabled = !backendReady || pairingPending;
+    pair.disabled = pairingPending;
     if (p.error) { show('PI04', String(p.error)); return; }
     if (p.pairingCode) {
       const remaining = Number(p.expires) - Date.now();
@@ -87,7 +85,7 @@
   function connect() {
     clearTimeout(retryTimer); clearTimeout(connectTimer); clearTimeout(pollTimer); clearPending(); clearCode();
     if (socket) { const previous = socket; socket = undefined; try { previous.close(); } catch {} }
-    backendReady = false; pair.disabled = true;
+    backendReady = false; pair.disabled = false;
     show('PI01', 'Verbindung zu Stream Deck wird hergestellt …');
     try {
       const current = new WebSocket(`ws://127.0.0.1:${parameters.port}`); socket = current; diagnostics();
@@ -111,17 +109,21 @@
     try {
       const action = JSON.parse(actionInfo), host = JSON.parse(info);
       if (!/^\d{1,5}$/.test(String(port)) || Number(port) < 1 || Number(port) > 65535 || typeof uuid !== 'string' || !uuid || typeof registerEvent !== 'string' || !registerEvent || typeof action.context !== 'string' || !action.context) throw new Error();
-      // Registration uses the UI UUID; messages use the selected ACTION context.
-      parameters = { port, uuid, registerEvent, context: action.context };
+      if (action.action !== ACTION) throw new Error();
+      parameters = { port, uuid, registerEvent, context: action.context, action: action.action };
       hostVersion = host.application?.version || 'unbekannt'; attempt = 0; connect();
-    } catch { pair.disabled = true; show('PI00', 'Ungültige Startdaten von Stream Deck. Aktion erneut auswählen oder Stream Deck neu starten.'); diagnostics(); }
+    } catch { pair.disabled = false; show('PI00', 'Ungültige Startdaten von Stream Deck. Aktion erneut auswählen oder Stream Deck neu starten.'); diagnostics(); }
   };
-  pair.onclick = () => send('pair');
+  pair.onclick = () => {
+    if (!parameters) { show('PI00', 'Bitte die Aktion „Automatik / Kopplung“ in Stream Deck auswählen.'); return; }
+    if (socket?.readyState !== WebSocket.OPEN || socket.hekiFailed) { attempt = 0; connect(); return; }
+    send('pair');
+  };
   document.querySelector('#status').onclick = () => {
     if (!parameters) { show('PI00', 'Bitte die Aktion „Automatik / Kopplung“ in Stream Deck auswählen.'); return; }
     if (socket?.readyState === WebSocket.OPEN && !socket.hekiFailed) { clearPending(); show('PI01', 'Pluginstatus wird angefordert …'); send('status'); }
     else { attempt = 0; connect(); }
   };
   code.onclick = () => code.select();
-  diagnostics();
+  pair.disabled = false; diagnostics();
 })();

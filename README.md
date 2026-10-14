@@ -1,18 +1,20 @@
 # HeKI Stream Deck Auto Profile Switcher
 
-Version **1.0.2** – Installation und Profilvorbereitung **ohne separate Node.js-Installation**, Stand 14.10.2026. Abnahmekandidat für Windows und Stream Deck XL.
+Version **1.0.3** – Installation und Profilvorbereitung **ohne separate Node.js-Installation**, Stand 14.10.2026. Abnahmekandidat für Windows und Stream Deck XL.
 
 ## Herunterladen
 
-- **[Komplettes ZIP 1.0.2 herunterladen](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.2.zip)** – Edge-Erweiterung, lokale grafische Profilvorbereitung, Installationspaket und deutsches Handbuch.
-- [Basis-Plugin als .streamDeckPlugin](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.2-Basis.streamDeckPlugin) – offizielles CLI-Paket, per Doppelklick installierbar. Enthält noch keine persönlichen Exportprofile; allein damit erfolgt noch kein BBB-Profilwechsel.
-- [SHA-256-Prüfsumme des ZIPs](downloads/HeKI-AutoProfile-1.0.2.zip.sha256)
+- **[Komplettes ZIP 1.0.3 herunterladen](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.3.zip)** – Edge-Erweiterung, lokale grafische Profilvorbereitung, Installationspaket und deutsches Handbuch.
+- [Basis-Plugin als .streamDeckPlugin](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.3-Basis.streamDeckPlugin) – offizielles CLI-Paket, per Doppelklick installierbar. Enthält noch keine persönlichen Exportprofile; allein damit erfolgt noch kein BBB-Profilwechsel.
+- [SHA-256-Prüfsumme des ZIPs](downloads/HeKI-AutoProfile-1.0.3.zip.sha256)
 
-## Update 1.0.2: Kopplungscode
+## Update 1.0.3: Kopplungscode und blockierter Button
 
-Die Kopplungsoberfläche meldet jetzt jede Code-Anforderung, fehlende Antworten nach fünf Sekunden, Verbindungsabbrüche und einen noch nicht gestarteten lokalen Dienst. Früh eintreffende Antworten werden bis zum Erscheinen des Einstellungsbereichs aufbewahrt. UI-, Plugin- und Stream-Deck-Version stehen direkt unter dem Status. Der vollständige Weg vom echten Button über das SDK bis zum angezeigten, erfolgreich eingelösten Code wurde in Chromium mit simuliertem Stream-Deck-Host geprüft. Der konkrete Ausfall auf dem Windows-Rechner ist damit noch nicht abschließend geklärt.
+Die UI-Anfragen verwenden jetzt die registrierte UI-Kennung entsprechend dem von Elgato empfohlenen sdpi-Client. Bisher wurde dafür die Aktionskennung verwendet; dadurch konnte eine unaufgeforderte Statusmeldung angezeigt werden, während eine Code-Anforderung unbeantwortet blieb. Der Button wird nach einem Timeout wieder freigegeben. Ein Timeout überschreibt außerdem nicht länger die zuletzt vom Plugin bestätigte Dienstbereitschaft. Status und Fehler stehen direkt über dem Button.
 
-Für ein Update das neue ZIP entpacken und **mit der neuen Profilvorbereitung alle eigenen Exportprofile erneut einbinden**. Das daraus erzeugte persönliche Paket installieren. Anschließend Stream Deck vollständig beenden, neu starten und die Aktion „Automatik / Kopplung“ auswählen. Wenn weiterhin kein Code erscheint, den angezeigten `PI`-Diagnosecode und die Versionszeile melden; keinen Kopplungscode oder Token weitergeben.
+Für ein Update das neue ZIP entpacken und **mit der neuen Profilvorbereitung alle eigenen Exportprofile erneut einbinden**. Das daraus erzeugte persönliche Paket installieren. Anschließend Stream Deck vollständig beenden, neu starten und die Aktion „Automatik / Kopplung“ auswählen. Die Oberfläche muss Version **1.0.3** zeigen. Wenn weiterhin kein Code erscheint, den angezeigten `PI`-Diagnosecode und die Versionszeile melden; keinen Kopplungscode oder Token weitergeben.
+
+Die Nachrichten wurden unabhängig mit dem ausgeführten Referenzclient verglichen. Zusätzlich wurde der komplette Kopplungsweg samt absichtlich fehlender Antwort und anschließend erfolgreichem zweiten Klick in Chromium mit simuliertem Stream-Deck-Host geprüft. Die Bestätigung auf dem tatsächlichen Windows-/XL-System steht noch aus.
 
 ## Auf dem Dienstrechner
 
@@ -31,7 +33,7 @@ Die Regelverwaltung unterstützt BBB, HeKI, Grafana, Speakr und eigene Websites,
 
 ## Nachweis und Grenzen
 
-26 automatisierte Tests sowie Build und offizielle Elgato-Validierung bestehen. Der personalisierte Paketaufbau wurde nach dem Entpacken ebenfalls durch die offizielle CLI validiert. Die grafische Profilvorbereitung wurde mit Auswahl, Download und unveränderter Archivkopie in Chromium geprüft; dafür diente ein statischer Testserver. Das direkte Öffnen lokaler Dateien und das Laden von Erweiterungen sind in dieser Entwicklungsumgebung administrativ gesperrt. Beide Wege müssen auf dem freigegebenen Windows-Rechner geprüft werden.
+29 automatisierte Tests sowie Build und offizielle Elgato-Validierung bestehen. Der personalisierte Paketaufbau wurde nach dem Entpacken ebenfalls durch die offizielle CLI validiert. Die grafische Profilvorbereitung wurde mit Auswahl, Download und unveränderter Archivkopie in Chromium geprüft; dafür diente ein statischer Testserver. Das direkte Öffnen lokaler Dateien und das Laden von Erweiterungen sind in dieser Entwicklungsumgebung administrativ gesperrt. Beide Wege müssen auf dem freigegebenen Windows-Rechner geprüft werden.
 
 Die echte Windows-/Edge-/XL-Abnahme und besonders die Übergabe an Outlook bleiben offen. Das SDK bestätigt nur den Versand eines Profilbefehls, nicht das sichtbar aktive Profil. Das Paket ist kein im Marketplace veröffentlichtes oder durch Elgato geprüftes Produkt.
 

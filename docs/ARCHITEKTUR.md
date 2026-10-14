@@ -86,3 +86,7 @@ Die Seite liegt sowohl als lokale HTML-Datei im ZIP als auch in der Edge-Erweite
 - [Playwright: Erweiterungstests und Grenzen gebrandeter Browser](https://playwright.dev/docs/chrome-extensions)
 
 Die Typdefinitionen und Implementierung der installierten offiziellen SDK-Version wurden zusätzlich lokal gegen die tatsächlich benutzten Funktionen geprüft.
+
+## UI-Nachrichtenrouting ab 1.0.3
+
+Die UI registriert sich mit dem vom Host übergebenen UUID. Für ausgehende `sendToPlugin`-Befehle wird dieser registrierte UI-UUID als `context` verwendet, entsprechend dem von Elgato empfohlenen sdpi-Client. Der Host ordnet die Nachricht der Aktion zu; das Plugin-SDK verarbeitet den Aktionskontext. UI-UUID und Aktionskontext werden im Test ausdrücklich verschieden gehalten. Antworten werden nur für diese beiden bekannten Kontexte und die eigene Aktion angenommen. Nach fünf Sekunden ohne passende Antwort endet die Button-Sperre; die Bereitschaft des lokalen Diensts wird ausschließlich aus Pluginmeldungen übernommen.

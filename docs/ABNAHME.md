@@ -1,6 +1,6 @@
 # Hardware-Abnahmeprotokoll
 
-Version 1.0.2, Stand 14.10.2026. **Alle Hardwarezeilen sind offen.** Automatisierte Ersatzprüfungen sind im separaten Testbericht beschrieben und ersetzen diese Abnahme nicht.
+Version 1.0.3, Stand 14.10.2026. **Alle Hardwarezeilen sind offen.** Automatisierte Ersatzprüfungen sind im separaten Testbericht beschrieben und ersetzen diese Abnahme nicht.
 
 Rechner/Benutzer: ____________________  Datum: __________
 
