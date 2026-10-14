@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:heki:autoprofile:config:v1",
+  "title": "HeKI Auto Profile Konfiguration", "type": "object", "additionalProperties": false,
+  "required": ["version", "paused", "unknown", "defaultProfile", "deviceIds", "rules"],
+  "properties": {
+    "version": { "const": 1 }, "paused": { "type": "boolean" },
+    "unknown": { "enum": ["release", "keep", "default"] },
+    "defaultProfile": { "type": "string", "pattern": "^([a-zA-Z0-9_-]{1,64})?$" },
+    "deviceIds": { "type": "array", "maxItems": 32, "items": { "type": "string", "minLength": 1, "maxLength": 128 } },
+    "rules": { "type": "array", "maxItems": 200, "items": {
+      "type": "object", "additionalProperties": false, "required": ["id", "name", "pattern", "profile", "priority", "enabled"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,64}$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[^\\u0000-\\u001f]+$" },
+        "pattern": { "type": "string", "minLength": 1, "maxLength": 1024, "description": "Host, *.Host oder Host/Pfad. Zusätzliche semantische Prüfung durch parsePattern: keine Zugangsdaten, Ports, Parameter, Fragmente oder Punktsegmente." },
+        "profile": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{1,64}$" },
+        "priority": { "type": "integer", "minimum": -10000, "maximum": 10000 },
+        "enabled": { "type": "boolean" }
+      }
+    } }
+  },
+  "allOf": [{ "if": { "properties": { "unknown": { "const": "default" } } }, "then": { "properties": { "defaultProfile": { "minLength": 1 } } } }]
+}

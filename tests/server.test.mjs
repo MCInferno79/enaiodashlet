@@ -1,0 +1,40 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import { moduleFor } from './helpers.mjs';
+const {createBridge}=await moduleFor('plugin/server');
+const {Controller}=await moduleFor('plugin/controller');
+const ORIGIN='chrome-extension://'+'a'.repeat(32),OTHER='chrome-extension://'+'b'.repeat(32);
+test('HTTP: Kopplung, Origin, Host, Authentifizierung, Replay und Profilbefehl',async t=>{
+  const calls=[];let saved;
+  const profiles=[{key:'BBB',label:'BBB',deviceType:2,name:'profiles/BBB'}];
+  const devices=()=>[{id:'XL',name:'XL',type:2,size:{columns:8,rows:4},isConnected:true}];
+  const c=new Controller(profiles,devices,async(_,p)=>calls.push(p));
+  const bridge=createBridge({controller:c,profiles,devices,saveCredentials:async c=>{saved=c;},savePaused:async()=>{}});
+  await bridge.listen();t.after(()=>bridge.close());
+  async function post(route,data={},token,origin=ORIGIN){return fetch('http://127.0.0.1:29381'+route,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(data)});}
+  assert.equal((await post('/v1/status')).status,403);
+  const pair=bridge.beginPairing();
+  assert.equal((await post('/v1/pair',{code:pair.code},undefined,'https://evil.example')).status,403);
+  assert.equal((await post('/v1/pair',{code:'wrong'})).status,401);
+  const response=await post('/v1/pair',{code:pair.code});assert.equal(response.status,200);
+  const {token}=await response.json();assert.equal(saved.token,token);
+  assert.equal((await post('/v1/pair',{code:pair.code})).status,401);
+  assert.equal((await post('/v1/status',{},'wrong')).status,401);
+  assert.equal((await post('/v1/status',{},token,OTHER)).status,403);
+  const status=await (await post('/v1/status',{},token)).json();
+  const event={instance:status.instance,sequence:1,focused:true,target:'BBB',keep:false,paused:false,deviceIds:[]};
+  assert.equal((await post('/v1/event',{...event,url:'https://secret'},token)).status,400);
+  assert.equal((await post('/v1/event',{...event,instance:'old'},token)).status,409);
+  assert.equal((await post('/v1/event',event,token)).status,200);assert.deepEqual(calls,['profiles/BBB']);
+  assert.equal((await post('/v1/event',event,token)).status,409);
+  assert.equal((await post('/v1/event',{...event,sequence:2,focused:false},token)).status,200);assert.equal(calls.at(-1),undefined);
+  const preflight=await fetch('http://127.0.0.1:29381/v1/event',{method:'OPTIONS',headers:{Origin:ORIGIN}});assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),ORIGIN);
+  const badHost=await new Promise(resolve=>{const req=http.request({host:'127.0.0.1',port:29381,path:'/v1/status',method:'POST',headers:{Host:'localhost:29381',Origin:ORIGIN}},r=>{r.resume();resolve(r.statusCode);});req.end();});assert.equal(badHost,403);
+  assert.equal((await post('/v1/pause',{paused:true},token)).status,200);assert.equal(c.isPaused,true);
+});
+test('Kopplungsversuche sind begrenzt',async t=>{
+  const c=new Controller([],()=>[],async()=>{});const bridge=createBridge({controller:c,profiles:[],devices:()=>[],saveCredentials:async()=>{},savePaused:async()=>{}});await bridge.listen();t.after(()=>bridge.close());bridge.beginPairing();
+  for(let i=0;i<5;i++)assert.equal((await fetch('http://127.0.0.1:29381/v1/pair',{method:'POST',headers:{Origin:ORIGIN,'Content-Type':'application/json'},body:'{"code":"wrong"}'})).status,401);
+  assert.equal((await fetch('http://127.0.0.1:29381/v1/pair',{method:'POST',headers:{Origin:ORIGIN,'Content-Type':'application/json'},body:'{}'})).status,429);
+});

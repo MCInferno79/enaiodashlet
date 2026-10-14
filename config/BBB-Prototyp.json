@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "paused": false,
+  "unknown": "release",
+  "defaultProfile": "",
+  "deviceIds": [],
+  "rules": [{ "id": "bbb", "name": "BigBlueButton", "pattern": "bbb.herten.de", "profile": "BBB", "priority": 100, "enabled": true }]
+}

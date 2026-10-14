@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "de.heki.autoprofile",
+  "Name": "HeKI Auto Profile",
+  "Author": "HeKI",
+  "Version": "1.0.0.0",
+  "Description": "Lokaler URL-basierter Profilwechsel für Microsoft Edge.",
+  "Category": "HeKI Auto Profile",
+  "CategoryIcon": "assets/category",
+  "Icon": "assets/plugin",
+  "CodePath": "bin/plugin.js",
+  "SDKVersion": 2,
+  "Software": { "MinimumVersion": "7.1" },
+  "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
+  "Nodejs": { "Version": "24" },
+  "Actions": [{
+    "UUID": "de.heki.autoprofile.control",
+    "Name": "Automatik / Kopplung",
+    "Tooltip": "Automatik pausieren oder fortsetzen. Kopplung im Einstellungsbereich.",
+    "Icon": "assets/action",
+    "PropertyInspectorPath": "ui/index.html",
+    "Controllers": ["Keypad"],
+    "States": [{ "Image": "assets/key", "TitleAlignment": "middle", "FontSize": 12 }]
+  }],
+  "Profiles": []
+}

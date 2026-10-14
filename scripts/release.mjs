@@ -1,0 +1,37 @@
+import { mkdir,rm,cp,readdir,readFile,writeFile,stat,access } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { zipSync } from 'fflate';
+import { marked } from 'marked';
+const version='1.0.0';const name=`HeKI-AutoProfile-${version}`;
+const stage=`release/${name}`;
+await access('dist/de.heki.autoprofile.sdPlugin/bin/plugin.js');
+await mkdir('release',{recursive:true});await rm(stage,{recursive:true,force:true});await mkdir(stage,{recursive:true});
+await cp('dist/de.heki.autoprofile.sdPlugin',stage+'/streamdeck-plugin',{recursive:true});
+await cp('dist/edge-extension',stage+'/edge-extension',{recursive:true});
+await cp('windows',stage,{recursive:true});await cp('config',stage+'/config',{recursive:true});await cp('docs',stage+'/docs',{recursive:true});
+await mkdir(stage+'/tools',{recursive:true});await cp('scripts/profiles.mjs',stage+'/tools/profiles.mjs');
+const source=stage+'/source';await mkdir(source,{recursive:true});
+for(const entry of ['src','scripts','tests','plugin','extension','profiles','config','docs','windows','package.json','package-lock.json','tsconfig.json','.gitignore','README.md','LICENSE'])await cp(entry,source+'/'+entry,{recursive:true});
+await cp('README.md',stage+'/README.md');await cp('LICENSE',stage+'/LICENSE');
+await cp('docs/Optionsvorschau.png',stage+'/Optionsvorschau.png');
+const style='body{font:16px/1.65 system-ui,Segoe UI,sans-serif;color:#17332f;background:#f2f6f4;margin:0}main{max-width:1050px;margin:32px auto;background:white;padding:38px 48px;border:1px solid #d7e4dc;border-radius:14px}h1{line-height:1.2}h2{margin-top:32px;color:#126c59}a{color:#126c59}pre,code{font-family:Consolas,monospace;background:#f1f5f2}pre{padding:18px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #d7e4dc;padding:9px;text-align:left}nav{display:flex;flex-wrap:wrap;gap:14px;border-bottom:1px solid #d7e4dc;padding-bottom:18px;margin-bottom:28px}.notice{border-left:4px solid #126c59;background:#eaf3ed;padding:14px}img{max-width:100%}@media(max-width:700px){main{margin:0;padding:20px}table{display:block;overflow:auto}}';
+const docNames=['INSTALLATION','ARCHITEKTUR','BETRIEB','SICHERHEIT','FEHLERSUCHE','ABNAHME','TESTBERICHT'];
+const titles=['Installation','Architektur','Betrieb & Update','Sicherheit','Fehlersuche','Hardware-Abnahme','Testbericht'];
+function page(title,body,isRoot=false){const nav=docNames.map((n,i)=>`<a href="${isRoot?'docs/':''}${n}.html">${titles[i]}</a>`).join('');return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} – HeKI Auto Profile</title><style>${style}</style></head><body><main><nav>${isRoot?'': '<a href="../START-HIER.html">Start</a>'}${nav}</nav>${body}</main></body></html>`;}
+for(const n of docNames){const md=await readFile(`docs/${n}.md`,'utf8');await writeFile(`${stage}/docs/${n}.html`,page(n,marked.parse(md)));}
+const intro=`<h1>HeKI Stream Deck Auto Profile Switcher</h1><p>Version ${version} · Windows / Stream Deck XL · Abnahmekandidat</p><div class="notice"><strong>Vor dem ersten BBB-Wechsel ein echtes XL-Exportprofil einbinden.</strong> Das Paket enthält keine Ihrer vorhandenen Benutzerprofile. Die SDK-Befehlskette ist getestet; die echte Windows-/XL-Abnahme und die Outlook-Übergabe stehen aus.</div><h2>Erste Einrichtung</h2><ol><li>Profile über Stream Deck sichern. Eine eigene BBB-Profilkopie erstellen und als <code>.streamDeckProfile</code> exportieren.</li><li>Stream Deck vollständig beenden. <code>Profile-einbinden.cmd</code> starten; Exportpfad angeben, Kennung <code>BBB</code>, Gerätetyp <code>2</code>. Dafür Node.js ab 22 auf dem Vorbereitungsrechner verwenden.</li><li><code>Installieren.cmd</code> ausführen, anschließend Stream Deck starten und Profilkopien importieren lassen.</li><li>In einem neuen Einrichtungsprofil die Aktion <em>Automatik / Kopplung</em> hinzufügen und dort einen Kopplungscode erzeugen.</li><li>In Edge <code>edge://extensions</code> öffnen, Entwicklermodus aktivieren und den Ordner <code>edge-extension</code> entpackt laden.</li><li>HeKI-Einstellungen öffnen, koppeln und zum BBB-Tab wechseln. Optional für den ersten Test <code>config/BBB-Prototyp.json</code> importieren und speichern.</li><li>Die <a href="docs/ABNAHME.html">Hardware-Abnahme</a> durchführen; besonders Outlook-Freigabe und Plugin-Hintergrundstart prüfen.</li></ol><h2>Was enthalten ist</h2><p>Gebautes Stream-Deck-Plugin, MV3-Edge-Erweiterung mit deutscher Regeloberfläche, CMD-Installation/Update/Entfernung, Profilassistent, Schema und Beispielkonfiguration, vollständiger TypeScript-Quellcode mit Lockfile sowie 16 automatisierte Tests.</p><p>Der Betrieb benötigt keinen HeKI-Windows-Dienst und keine Cloud. Stream Deck ab 7.1 mit bereits vorhandener Node.js-24-Laufzeit ist Voraussetzung. Der Profilassistent kopiert nur Exportarchive in das Vorbereitungspaket. Originalprofile und andere Pluginordner werden nicht bearbeitet.</p><h2>Oberfläche</h2><p>Die folgende Ansicht ist eine getestete UI-Vorschau mit simuliertem Geräte-/Verbindungsstatus.</p><img src="Optionsvorschau.png" alt="Deutsche Optionsseite mit Domainregeln, Status, Pause und Geräteeinstellungen"><h2>Vollständige Unterlagen</h2><p>Die Navigation oben führt zur vollständigen Installation, technischen Machbarkeit, Sicherheit und Betrieb. <code>source/</code> enthält alle Quellen, Buildskripte und Tests. Nach Änderungen an Profilarchiven den eigenen Pluginordner über den vorgesehenen Updateweg neu installieren.</p>`;
+await writeFile(stage+'/START-HIER.html',page('Start',intro,true));
+let notices='# Drittanbieter-Lizenzen\n\nDie Pluginlaufzeit enthält die folgenden MIT-lizenzierten Bibliotheken. Entwicklungsabhängigkeiten sind über package-lock.json nachvollziehbar; sie werden nicht als zusätzliche Laufzeitdienste installiert.\n';
+for(const pkg of ['@elgato/streamdeck','@elgato/utils','@elgato/schemas','ws']){
+  const root='node_modules/'+pkg;const metadata=JSON.parse(await readFile(root+'/package.json','utf8'));
+  let license='';for(const file of ['LICENSE','LICENSE.md','LICENSE.txt'])try{license=await readFile(root+'/'+file,'utf8');break;}catch{}
+  notices+=`\n## ${pkg} ${metadata.version}\n\n${license||'Lizenz: '+metadata.license+'; Paketquelle: '+JSON.stringify(metadata.repository)}\n`;
+}
+await writeFile(stage+'/THIRD-PARTY-NOTICES.md',notices);
+await writeFile(stage+'/streamdeck-plugin/THIRD-PARTY-NOTICES.md',notices);
+async function files(root,prefix=''){let out=[];for(const e of (await readdir(root,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name,'en'))){const relative=prefix+e.name;out.push(...(e.isDirectory()?await files(root+'/'+e.name,relative+'/'):[relative]));}return out;}
+const checks=[];for(const file of await files(stage))checks.push(createHash('sha256').update(await readFile(stage+'/'+file)).digest('hex')+'  '+file);
+await writeFile(stage+'/SHA256SUMS.txt',checks.join('\n')+'\n');
+const entries={};for(const file of await files(stage))entries[name+'/'+file]=[new Uint8Array(await readFile(stage+'/'+file)),{mtime:new Date('2026-01-01T00:00:00Z')}];
+const zipped=zipSync(entries,{level:9});await writeFile('release/'+name+'.zip',zipped);await writeFile('release/'+name+'.zip.sha256',createHash('sha256').update(zipped).digest('hex')+'  '+name+'.zip\n');
+console.log(`Release erstellt: release/${name}.zip (${zipped.length} Bytes, ${Object.keys(entries).length} Dateien)`);
