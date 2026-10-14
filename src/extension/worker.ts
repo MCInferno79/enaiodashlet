@@ -1,3 +1,5 @@
+import { createDeckLink } from "./deck-link";
+import { EMPTY_WORKSPACES, validateWorkspaces } from "../shared/workspaces";
 import { DEFAULT_CONFIG, validateConfig, matchRule, type Config } from "../shared/config";
 const BASE = "http://127.0.0.1:29381";
 type Auth = { token: string };
@@ -15,17 +17,19 @@ async function settings(): Promise<{ config: Config; auth?: Auth }> {
   return { config: validateConfig(v.config ?? DEFAULT_CONFIG), auth: candidate && /^[a-f0-9]{64}$/.test(candidate.token) ? candidate : undefined };
 }
 async function saveStatus(s: Record<string, unknown>) { await chrome.storage.session.set({ status: { ...s, updatedAt: Date.now() } }); }
-async function activeTab(): Promise<{ focused: boolean; url: string }> {
+async function activeTab(): Promise<{ focused: boolean; url: string; tabId?: number }> {
   const windows = await chrome.windows.getAll({ windowTypes: ["normal", "popup"] });
   const window = windows.find(w => w.focused);
   if (!window || window.id === undefined) return { focused: false, url: "" };
   const [tab] = await chrome.tabs.query({ active: true, windowId: window.id });
-  return { focused: !!tab, url: tab?.url ?? "" };
+  return { focused: !!tab, url: tab?.url ?? "", tabId: tab?.id };
 }
+const deckLink = createDeckLink(activeTab);
 async function evaluate() {
   const mine = revision;
   const { config, auth } = await settings();
   const active = await activeTab();
+  await deckLink.sync(auth?.token);
   const match = matchRule(active.url, config.rules);
   if (!auth?.token) { await saveStatus({ connected: false, host: match.host, message: "Bitte zuerst mit dem Stream-Deck-Plugin koppeln." }); return; }
   try {
@@ -37,14 +41,16 @@ async function evaluate() {
     // Re-read focus immediately before sending; no URL or host leaves this worker.
     const latest = await activeTab();
     if (mine !== revision || latest.focused !== active.focused || latest.url !== active.url) { pending = true; return; }
-    const target = match.rule?.profile ?? (config.unknown === "default" ? config.defaultProfile : null);
-    const result: Status = await api("/v1/event", { instance: server.instance, sequence, focused: active.focused, target, keep: !match.rule && config.unknown === "keep", paused: config.paused, deviceIds: config.deviceIds }, auth.token);
+    const legacy = await chrome.storage.local.get("profileSwitchingEnabled");
+    const profileSwitching = legacy.profileSwitchingEnabled === true;
+    const target = !profileSwitching ? null : match.rule?.profile ?? (config.unknown === "default" ? config.defaultProfile : null);
+    const result: Status = await api("/v1/event", { instance: server.instance, sequence, focused: active.focused && profileSwitching, target, keep: !match.rule && config.unknown === "keep", paused: config.paused, deviceIds: config.deviceIds }, auth.token);
     const missing = result.results.some(r => r.state === "profile-missing");
     const failed = result.results.some(r => r.state === "sdk-error");
     const paused = config.paused || result.paused;
     const selected = result.devices.filter(d => d.isConnected && (!config.deviceIds.length || config.deviceIds.includes(d.id)));
     const requested = result.results.some(r => r.state === "command-sent");
-    let message = paused ? "Automatik pausiert – Profilfreigabe angefordert." : !active.focused ? "Edge im Hintergrund – Profilfreigabe angefordert." : selected.length === 0 ? "Kein ausgewähltes Stream Deck verbunden." : failed ? "Stream-Deck-Befehl fehlgeschlagen." : missing ? "Profil für dieses Gerät fehlt. Exportdatei mit Profile-Paket-erstellen.html lokal einbinden und das erzeugte Plugin installieren." : requested ? `Microsoft Edge erkannt – ${match.host || "interne Seite"} – Profilbefehl ${target ?? "beibehalten"} gesendet.` : "Keine passende Regel – Profilfreigabe angefordert.";
+    let message = !profileSwitching ? "PageDeck-Webseitenmodus aktiv. Eigene Tastenaktionen werden über die Webseiten-Einstellungen verwaltet." : paused ? "Automatik pausiert – Profilfreigabe angefordert." : !active.focused ? "Edge im Hintergrund – Profilfreigabe angefordert." : selected.length === 0 ? "Kein ausgewähltes Stream Deck verbunden." : failed ? "Stream-Deck-Befehl fehlgeschlagen." : missing ? "Profil für dieses Gerät fehlt. Exportdatei mit Profile-Paket-erstellen.html lokal einbinden und das erzeugte Plugin installieren." : requested ? `Microsoft Edge erkannt – ${match.host || "interne Seite"} – Profilbefehl ${target ?? "beibehalten"} gesendet.` : "Keine passende Regel – Profilfreigabe angefordert.";
     await saveStatus({ connected: true, host: match.host, profile: target, message, server: result });
     await chrome.action.setBadgeText({ text: paused ? "Ⅱ" : missing || failed ? "!" : "" });
     await chrome.action.setBadgeBackgroundColor({ color: missing || failed ? "#b45309" : "#0f766e" });
@@ -71,13 +77,16 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(e => { if (e.frameId === 
 chrome.webNavigation.onReferenceFragmentUpdated.addListener(e => { if (e.frameId === 0) schedule(); });
 chrome.runtime.onStartup.addListener(schedule);
 chrome.runtime.onInstalled.addListener(() => { void chrome.storage.local.get("config").then(v => { if (!v.config) return chrome.storage.local.set({ config: DEFAULT_CONFIG }); }).then(schedule); });
-chrome.storage.onChanged.addListener((changes, area) => { if (area === "local" && (changes.config || changes.auth)) schedule(); });
+chrome.storage.onChanged.addListener((changes, area) => { if (area === "local" && (changes.config || changes.auth || changes.workspaces || changes.profileSwitchingEnabled)) schedule(); });
 chrome.alarms.onAlarm.addListener(a => { if (a.name === "heki-reconnect") schedule(); });
 chrome.action.onClicked.addListener(() => { void chrome.runtime.openOptionsPage(); });
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
-  if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("options.html")) return;
+  if (sender.id !== chrome.runtime.id || !["options.html","workspaces.html"].some(p=>sender.url===chrome.runtime.getURL(p))) return;
   const run = async () => {
     switch (message?.type) {
+      case "profiles:enable": { if(typeof message.enabled!=="boolean")throw new Error("Ungültige Einstellung.");await chrome.storage.local.set({profileSwitchingEnabled:message.enabled});schedule();return {ok:true}; }
+      case "workspaces:get": { const data=await chrome.storage.local.get("workspaces");const s=await chrome.storage.session.get("webStatus");return {ok:true,config:validateWorkspaces(data.workspaces??EMPTY_WORKSPACES),status:s.webStatus}; }
+      case "workspaces:save": { const config=validateWorkspaces(message.config);await chrome.storage.local.set({workspaces:config});schedule();return {ok:true}; }
       case "status": { const v = await chrome.storage.session.get("status"); return { ok: true, status: v.status }; }
       case "refresh": schedule(); return { ok: true };
       case "save": { const config = validateConfig(message.config); await chrome.storage.local.set({ config }); schedule(); return { ok: true }; }

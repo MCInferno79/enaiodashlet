@@ -28,7 +28,7 @@ export function inspectorMessages(o: {
       try {
         if (p.command === "pair") {
           if (!o.isServerReady()) {
-            await deliver(context, { requestId, error: "Der lokale HeKI-Endpunkt ist noch nicht verfügbar. Port 29381 prüfen und Status erneut abrufen." });
+            await deliver(context, { requestId, error: "Der lokale PageDeck-Endpunkt ist noch nicht verfügbar. Port 29381 prüfen und Status erneut abrufen." });
             return;
           }
           const result = o.beginPairing();
@@ -36,7 +36,7 @@ export function inspectorMessages(o: {
         } else await deliver(context, { requestId, ...o.status() });
       } catch {
         o.log("PI_COMMAND_FAILED");
-        await deliver(context, { requestId, error: "HeKI konnte die Anfrage nicht verarbeiten. Stream Deck vollständig neu starten und die lokalen Ereigniscodes prüfen." }).catch(() => {});
+        await deliver(context, { requestId, error: "PageDeck konnte die Anfrage nicht verarbeiten. Stream Deck vollständig neu starten und die lokalen Ereigniscodes prüfen." }).catch(() => {});
       }
     },
     async didAppear(context: string) {

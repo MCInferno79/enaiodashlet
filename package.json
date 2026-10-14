@@ -1,9 +1,9 @@
 {
-  "name": "heki-stream-deck-auto-profile-switcher",
-  "version": "1.0.3",
+  "name": "pagedeck",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Lokaler URL-basierter Stream-Deck-Profilwechsler für Microsoft Edge",
+  "description": "Universelle Webseiten-Aktionen auf frei belegbaren Stream-Deck-Tasten",
   "engines": {
     "node": ">=22"
   },
@@ -19,7 +19,9 @@
     "test:packager": "node tests/packager.e2e.mjs",
     "validate:personalized": "node scripts/check-installer.mjs && streamdeck validate work/installer-check/de.heki.autoprofile.sdPlugin --no-update-check",
     "test:inspector": "node tests/inspector.e2e.mjs",
-    "test:reference": "node scripts/check-ui-reference.mjs"
+    "test:reference": "node scripts/check-ui-reference.mjs",
+    "test:web": "node tests/web-actions.e2e.mjs",
+    "test:workspaces-ui": "node tests/workspaces-ui.e2e.mjs"
   },
   "dependencies": {
     "@elgato/streamdeck": "3.0.2"

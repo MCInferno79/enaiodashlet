@@ -1,84 +1,25 @@
-# Fehlerdiagnose
+# PageDeck: Fehlersuche
 
-| Beobachtung | Prüfung / Maßnahme |
+| Beobachtung | Prüfung |
 |---|---|
-| „Lokaler Dienst nicht erreichbar“ | Stream Deck starten. Eigenes Einrichtungsprofil mit Steueraktion anzeigen. In Edge Verbindung testen. Bis etwa 30 Sekunden ohne Browserereignis abwarten. |
-| Kein Plugin in der Aktionsliste | Installationspfad und manifest.json prüfen, Stream Deck vollständig neu starten; Mindestversion 7.1 und vorhandene Node.js-24-Laufzeit prüfen. Unternehmensfreigaben beachten. |
-| „Profil fehlt“ trotz vorhandenem Benutzerprofil BBB | Der Benutzerprofilname genügt nicht. Eine neue XL-Kopie exportieren, in Profile-Paket-erstellen.html mit Kennung BBB / Typ 2 einbinden und die erzeugte .streamDeckPlugin-Datei installieren. |
-| Nach Installation noch kein Umschalten | Katalog muss Exportprofile enthalten. Importdialog im Host bestätigen, Erweiterung koppeln, Pause prüfen, gewünschten Tab in den Vordergrund bringen. |
-| „Kopplung fehlt oder wurde erneuert“ | Neuer Code im Inspector, danach in Edge koppeln. Prüfen, ob ein zweites Browserprofil den ersten Token ersetzt hat oder der Erweiterungspfad verändert wurde. |
-| Kopplungscode abgelaufen | Neuen Code erzeugen; zwei Minuten Gültigkeit. Nach fünf Fehlversuchen eine Minute warten. |
-| BBB passt versehentlich auf fremde Domain | Mitgelieferte Tests und Regeln prüfen. Nur technische Hostnamen, keine Textsuche auf URL oder Fenstertitel. `bbb.herten.de.example.com` muss unpassend sein. |
-| Anderes Edge-Fenster entscheidet | Prüfen, welches Fenster tatsächlich fokussiert ist. Nur der aktive Tab des fokussierten Fensters zählt. Optionsseite selbst ist eine unbekannte/interne Seite. |
-| Smart Profile für Outlook erscheint nicht | Automatik pausieren, neutrales Profil im Host auswählen. Hardwaretest der dokumentierten Freigabe durchführen; die API garantiert kein erneutes Smart-Profile-Ereignis. Keine undokumentierten mehrfachen Rücksprungkommandos verwenden. |
-| Bearbeitung springt zurück | Vor Profilbearbeitung pausieren. Das SDK bietet keine allgemeine Abfrage „Benutzer bearbeitet gerade irgendein Profil“. |
-| Pause lässt sich nicht aufheben | Edge-Pause und Plugin-Pause getrennt prüfen. „Pause am Stream Deck aufheben“ zusätzlich betätigen. |
-| Stream Deck neu gestartet, falscher Rücksprung | Geplante Neustarts bei pausierter Automatik und neutralem Profil durchführen. Nach hartem Absturz ist der historische Anker über die API nicht rekonstruierbar. |
-| Nach Update alte Tastenbelegung | Bearbeitbare importierte Kopien werden nicht zwangsläufig durch Archivvorlagen ersetzt. Kopie über die Oberfläche neu importieren oder neue Profilkennung/Version verwenden. Originale nicht ersetzen. |
-| Port belegt | In CMD `netstat -ano` prüfen. Keine zweite HeKI-Installation parallel starten. Plugin versucht die Bindung mit begrenztem Backoff erneut. Einen fremden Prozess nicht ungeprüft beenden. |
-| Erweiterung kann nicht geladen werden | `edge://policy` bzw. IT-Freigaben prüfen. Entwicklermodus allein überstimmt keine Administrationsrichtlinie. Richtlinien nicht umgehen. |
-| Lokaler Netzwerkzugriff blockiert | Browsermeldung und Edge-Richtlinien zur lokalen Kommunikation prüfen; für diese Erweiterung entsprechend IT-Vorgaben freigeben. Keine globalen Sicherheitsfunktionen abschalten. |
-| Grafana-Aktion funktioniert nicht | Ursprüngliches Grafana-Plugin installiert lassen. Dessen Anmeldung/globalen Settings unabhängig vom Profilexport prüfen. HeKI verändert sie nicht. |
+| Keine PageDeck-Aktionen | Installer per Doppelklick installieren; Stream Deck ab 7.1 mit verfügbarer Node.js-24-Plugin-Laufzeit; vollständig neu starten. |
+| Tasten zeigen nur „PageDeck / Nummer“ | Webseite in Edge fokussieren. Passende Domain/Pfadregel und Aktivierung prüfen, speichern, Pause prüfen. |
+| Beschriftung ändert sich nicht | Einen selbst vergebenen festen Tastentitel im Stream-Deck-Editor entfernen; das SDK überschreibt ihn nicht. |
+| Falsche Tastenfunktion | Tastennummer im Einstellungsbereich mit der Nummer in Edge vergleichen; Domain/Pfad und Priorität prüfen. |
+| Warnsymbol nach Tastendruck | PageDeck in Edge öffnen: letzter Fehler. Fehlende Website-Freigabe, Elementselektor, Fokus und Pause prüfen. |
+| Website-Zugriff fehlt | Eigene Domain eintragen und „Website freigeben“ wählen. Falls die Organisation dies blockiert, deren Freigabe einholen; keine Richtlinien umgehen. |
+| Element nicht gefunden | Selektor in Edge prüfen. Element muss im Hauptframe liegen; bei SPAs erst nach dessen Darstellung drücken. |
+| Text wird nicht übernommen | Standardfeld, Schreibschutz, Feldtyp und Format prüfen. Besondere Editoren können eine eigene Integration benötigen. |
+| Hotkey ohne Wirkung | Seiten-Tastenkürzel sind DOM-Ereignisse. Windows-/Browser-Hotkeys direkt als Stream-Deck-Hotkey-Aktion einrichten. |
+| Kein Code / PI03 | UI-Version prüfen. Ab 2.0 wird nach fünf Sekunden der Button wieder frei. Erneut versuchen oder Verbindung erneut prüfen; Status- und Versionszeile melden. |
+| PI00 | Inspector wurde nicht mit gültigen Hostdaten verbunden. Aktion im Stream-Deck-Editor auswählen. |
+| PI02 | SDK-Verbindung geschlossen; Wiederverbindung oder Stream Deck vollständig neu starten. |
+| PI04 | Angezeigten Dienstfehler prüfen. Bei Portkonflikt 29381 keine zweite Plugininstanz parallel starten. |
+| PI10 / PI11 | Bereit bzw. Code angezeigt / Code abgelaufen. Bei Bedarf neu erzeugen. |
+| Erweiterung gesperrt | `edge://policy` und Freigaben der Organisation prüfen. |
+| Verbindung nach Update fehlt | Edge-Dateien am bisherigen Erweiterungsort aktualisieren, Erweiterung neu laden, Stream Deck neu starten. Bei geänderter Erweiterungs-ID neu koppeln. |
+| Keine echten Profile in der Liste | Elgato erlaubt keinen Zugriff auf beliebige Benutzerprofile. Für dynamische Webseiten-Tasten ist keine Profilauswahl nötig. Optionaler Profilwechsel benötigt weiterhin eingebundene Exporte. |
 
-## Kein Kopplungscode (ab 1.0.3)
+Die Statusmeldung steht im Inspector direkt über dem Kopplungsbutton. Bei „Webseiten-Taste“ zusätzlich die Tastennummer einstellen. Ein Druck auf „Verbindung / Pause“ am Gerät pausiert; ein Code wird im Einstellungsbereich erzeugt.
 
-Die Aktion **„Automatik / Kopplung“ mit der Maus im Stream-Deck-Editor auswählen**. Der Kopplungsbutton steht unten im Einstellungsbereich; ein Druck auf die physische Taste pausiert nur die Automatik. Der Code erscheint im Textfeld direkt unter dem Button.
-
-| Anzeige | Bedeutung / nächster Schritt |
-|---|---|
-| PI00 | Stream Deck hat die Oberfläche nicht mit gültigen Startdaten verbunden. Aktion erneut auswählen; die Inspector-HTML nicht außerhalb von Stream Deck öffnen. |
-| PI01 | Verbindungsaufbau oder Anfrage läuft. Nach spätestens fünf Sekunden folgt bei fehlender Antwort PI02/PI03. |
-| PI02 | SDK-WebSocket geschlossen oder nicht erreichbar. Drei automatische Wiederverbindungen; „Verbindung erneut prüfen“ bleibt bedienbar. |
-| PI03 | Keine passende Antwort innerhalb von fünf Sekunden. Der Codebutton wird wieder freigegeben. Erneut versuchen oder „Verbindung erneut prüfen“ wählen. Eine ältere Version 1.0.2 kann den Button hier dauerhaft sperren; auf 1.0.3 aktualisieren. |
-| PI04 | Konkreter Dienst-/Pluginfehler. Den angezeigten Text beachten. Bei Port 29381 auf Konflikte prüfen. |
-| PI10 | Plugin bereit oder Code erfolgreich angezeigt. Maßgeblich ist der Text und das Codefeld. |
-| PI11 | Code nach zwei Minuten aus dem Feld entfernt; bei Bedarf erneut erzeugen. |
-
-Ein Timeout ändert ab 1.0.3 nicht die zuletzt gemeldete Dienstbereitschaft. „Nicht bereit“ war in 1.0.2 nach PI03 daher kein Beweis für einen Portkonflikt.
-
-Die Diagnosezeile nennt Oberfläche, tatsächlich vom Host gemeldete Pluginversion, Stream-Deck-Version und Verbindungszustand. Ein neues persönliches Paket muss mit der **neuen** Profilvorbereitung erzeugt werden; eine alte heruntergeladene HTML-Datei enthält weiterhin den alten Pluginstand. Stream Deck nach dem Update vollständig beenden und neu starten. Zum Support zuerst nur Status- und Versionszeile melden, keinen Code oder Token.
-
-In `service.log` bedeutet `PI_PAIR_REQUEST`, dass die Anfrage im Plugin eingetroffen ist. `PI_REPLY_SENT` bestätigt die Übergabe an das SDK, noch keine Anzeige im Browser. `PI_REPLY_DEFERRED` bedeutet, dass der Einstellungsbereich laut SDK noch nicht sichtbar war; die Antwort wird beim Erscheinen nachgeliefert. `PI_COMMAND_FAILED` bezeichnet einen abgefangenen internen Fehler. Es werden keine Payloads, Codes oder Tokens protokolliert.
-
-## Profilvorbereitung und Installation
-
-- Keine separate Node-Installation nötig: `Profile-Paket-erstellen.html` in Edge öffnen oder die Seite über den Link in den Erweiterungseinstellungen aufrufen. Die CMD-Datei `Profile-einbinden.cmd` öffnet jetzt lediglich diese Seite.
-- Lokale HTML-Datei wird durch die Administration blockiert: Erweiterungsseite verwenden; keine Sicherheitsrichtlinien umgehen.
-- Doppelklick öffnet das Paket nicht: die Dateizuordnung für `.streamDeckPlugin` muss auf Stream Deck zeigen. Keine Umbenennung zu `.streamDeckProfile`; das sind unterschiedliche Dateitypen.
-- Ein Update wird nicht angeboten/akzeptiert: höhere Paketrevision als beim zuletzt installierten persönlichen Paket wählen. Basisinstaller ohne Profile nicht als Ersatz für das persönliche Paket installieren.
-- „Basispaket überschreitet die sichere Entpackgröße“: vollständiges aktuelles Release-ZIP verwenden. Dies schützt insbesondere vor falsch ausgewerteten ZIP64-Größen; keine Limits abschalten.
-- Die Seite liest nur ausgewählte Exporte; sie prüft keine undokumentierten internen Aktionsschemas. Ein formal vorhandenes Archiv kann daher erst beim tatsächlichen Import in Stream Deck endgültig geprüft werden.
-
-## Lokale Logs
-
-Im Explorer `%APPDATA%\HeKI-AutoProfile` öffnen. `service.log` enthält beispielsweise `START`, `PROFILE_COMMAND_SENT`, `PROFILE_RELEASE_SENT`, `LOCAL_PORT_UNAVAILABLE`. Ein gesendeter Befehl ist keine Hardwarebestätigung. SDK-Fehlerlogs liegen gegebenenfalls im eigenen Plugin-Unterordner `logs`.
-
-Bei einer Supportanfrage genügen zunächst Softwareversionen, Gerätetyp/Raster, fester Ereigniscode und der betroffene Abnahmeschritt. **pairing.json, Browserprofildaten und echte Exportprofile nicht unkontrolliert weitergeben.**
-
-## Entwicklungsprüfung in CMD
-
-Vor den HTTP-/SDK-Integrationstests Stream Deck vollständig beenden, damit der Testport 29381 frei ist. Die Tests verwenden ausschließlich eigene temporäre Verzeichnisse und fiktive Profileinträge; sie importieren keine Profile in die echte Stream-Deck-Software.
-
-```cmd
-cd source
-npm ci
-npm run check
-npm run build
-npm test
-npm run validate
-npm run validate:personalized
-npm run test:packager
-```
-
-Für einen UI-Test ist ein verfügbarer Chromium-Testbrowser erforderlich. Beispiel:
-
-```cmd
-set "HEKI_BROWSER_PATH=C:\FreigegebeneTools\Chromium\chrome.exe"
-npm run test:ui
-npm run test:inspector
-npm run test:browser
-```
-
-`test:ui` prüft die Optionsseite mit simulierten Browser-APIs. `test:browser` benötigt die Erlaubnis, eine tatsächliche entpackte Erweiterung im Testbrowser zu laden. In der gelieferten Cloud-Umgebung ist genau dies administrativ gesperrt; deshalb wird dieser Test dort nicht als bestanden ausgewiesen. Tests nutzen ausschließlich fiktive Navigationen und einen simulierten Stream-Deck-Host.
-
-Die Entwicklungsbefehle gelten nur für den Buildrechner. Auf dem Dienstrechner werden keine npm-Kommandos ausgeführt. Der Test der Profilvorbereitung nutzt einen statischen Testserver; die Produktseite benötigt diesen nicht. Ein direkter file://-Test wurde hier durch die Browseradministration blockiert.
+Lokale Ereigniscodes liegen aus Update-Kompatibilität unter `%APPDATA%\HeKI-AutoProfile\service.log`. Beispiele: `START`, `PI_PAIR_REQUEST`, `PI_REPLY_SENT`, `PI_REPLY_DEFERRED`, `PI_COMMAND_FAILED`, `WEB_ACTION_OK`, `WEB_ACTION_FAILED`, `WEB_TITLE_FAILED`, `LOCAL_PORT_UNAVAILABLE`. Keine URLs, Selektoren, Texte oder Tokens werden geloggt. Für Support zunächst PageDeck-/Stream-Deck-/Edge-Version, Gerät und Fehlercode nennen.

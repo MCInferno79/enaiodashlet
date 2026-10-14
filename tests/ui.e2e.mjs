@@ -14,8 +14,8 @@ try{
     window.chrome={storage:{local:{get:async()=>({config})},onChanged:{addListener:f=>listeners.push(f)}},runtime:{sendMessage:async m=>{if(m.type==='status')return{ok:true,status:{message:'Testvorschau – lokaler Verbindungsstatus. Hardware noch nicht abgenommen.',connected:true,server}};if(m.type==='save'){config=m.config;return{ok:true};}return{ok:true};}}};
   });
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:'+server.address().port);
-  await page.locator('#connection').getByText('Lokal verbunden').waitFor();assert.equal(await page.locator('#rules tr').count(),4);
-  await page.locator('#add').click();assert.equal(await page.locator('#rules tr').count(),5);await page.locator('#rules tr').last().locator('button').click();assert.equal(await page.locator('#rules tr').count(),4);
+  await page.locator('#connection').getByText('Lokal verbunden').waitFor();assert.equal(await page.locator('#rules tr').count(),0);
+  await page.locator('#add').click();assert.equal(await page.locator('#rules tr').count(),1);await page.locator('#rules tr').last().locator('button').click();assert.equal(await page.locator('#rules tr').count(),0);
   await page.locator('button[type=submit]').click();await page.locator('#feedback').getByText('Einstellungen gespeichert.').waitFor();
   await page.locator('#pause').click();await page.locator('#feedback').getByText('Automatik pausiert.').waitFor();await page.locator('#pause').click();
   await page.screenshot({path:'work/options-preview.png',fullPage:true});assert.equal(errors.length,0,errors.join('\n'));

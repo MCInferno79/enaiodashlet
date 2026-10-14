@@ -30,10 +30,10 @@ async function main(){
   const root=path.resolve(process.argv[2]??'dist/de.heki.autoprofile.sdPlugin');
   const rl=createInterface({input:stdin,output:stdout});
   try{
-    console.log('HeKI – Exportprofile unverändert einbinden. Stream Deck vorher vollständig beenden.\nFür den BBB-Prototyp: BBB-Profil in Stream Deck exportieren und Kennung BBB verwenden.\nGerätetyp: XL = 2; MK.2 = 0; Mini = 1; + = 7; Neo = 9; + XL = 13.');
+    console.log('PageDeck – Exportprofile unverändert einbinden. Stream Deck vorher vollständig beenden.\nFür den optionalen Profilwechsel eigene Exportprofile auswählen.\nGerätetyp: XL = 2; MK.2 = 0; Mini = 1; + = 7; Neo = 9; + XL = 13.');
     while(true){
       const file=(await rl.question('\nPfad zur .streamDeckProfile-Datei (leer = Ende): ')).trim().replace(/^"|"$/g,'');if(!file)break;
-      const key=(await rl.question('Profilkennung [BBB]: ')).trim()||'BBB';
+      const key=(await rl.question('Profilkennung [Website]: ')).trim()||'Website';
       const label=(await rl.question('Anzeigename ['+key+']: ')).trim()||key;
       const deviceType=Number((await rl.question('SDK-Gerätetyp [2 = XL]: ')).trim()||'2');
       try{const result=await addProfile(root,file,key,label,deviceType);console.log('Eingebunden: '+result.name+'\nSHA256: '+result.sha256);}catch(e){console.error(e.message);process.exitCode=1;}

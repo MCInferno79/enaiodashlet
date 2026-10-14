@@ -17,7 +17,7 @@ function row(key: string, label: string) {
   for (const child of [keyInput, labelInput, type, file, remove]) { const td = document.createElement("td"); td.append(child); tr.append(td); }
   el("profiles").append(tr);
 }
-for (const [key, label] of [["BBB", "BBB"], ["HeKI", "HeKI"], ["Grafana", "HeKI / Grafana"], ["Speakr", "Speakr"], ["Standard", "Standardprofil"]]) row(key!, label!);
+row("Website", "Meine Website");
 el("add").addEventListener("click", () => { if (!busy && el("profiles").children.length < 32) row("", ""); });
 try { el<HTMLInputElement>("revision").value = String(Math.min(65535, Math.max(1, Number(localStorage.getItem("heki-package-revision") ?? 0) + 1))); } catch { /* Local file storage can be disabled by policy. */ }
 el("build").addEventListener("click", () => { void build().catch(e => feedback(e instanceof Error ? e.message : "Paket konnte nicht erstellt werden.")); });
@@ -43,7 +43,7 @@ async function build() {
     const link = el<HTMLAnchorElement>("download");
     if (link.href.startsWith("blob:")) URL.revokeObjectURL(link.href);
     link.href = URL.createObjectURL(new Blob([new Uint8Array(result.bytes)], { type: "application/octet-stream" }));
-    link.download = `HeKI-AutoProfile-${result.version}.streamDeckPlugin`; link.hidden = false;
+    link.download = `PageDeck-${result.version}.streamDeckPlugin`; link.hidden = false;
     feedback(`Paket ${result.version} mit ${result.profiles.length} Profil(en) fertig. Jetzt herunterladen und die .streamDeckPlugin-Datei per Doppelklick in Stream Deck installieren.`);
     try { localStorage.setItem("heki-package-revision", String(revision)); } catch { /* Only this non-sensitive number is remembered, never files or their contents. */ }
   } finally { busy = false; controls.forEach(c => { c.disabled = false; }); }

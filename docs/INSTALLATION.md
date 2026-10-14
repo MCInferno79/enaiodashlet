@@ -1,72 +1,26 @@
-# Installation ohne separate Node.js-Installation
+# PageDeck installieren
 
-## Voraussetzungen
+Version 2.0.0, Stand 14.10.2026. Windows, Microsoft Edge und Stream Deck; das XL besitzt 32 Tasten. Stream Deck mindestens 7.1 mit verfügbarer Node.js-24-Plugin-Laufzeit. **Keine separate Node-Installation und kein zusätzlicher Windows-Dienst.**
 
-- Windows 10/11, Microsoft Edge ab Chromium-Version 120, Stream Deck ab 7.1. Die von der IT freigegebene aktuelle Version verwenden.
-- Stream Deck XL, SDK-Typ `2`, 8 Spalten × 4 Zeilen. Andere Typen benötigen passende eigene Exportprofile. Keine Beschränkung auf 15 Tasten.
-- Stream Deck stellt seine **eigene Node.js-24-Plugin-Laufzeit** bereit. Eine systemweite Node.js-Installation ist nicht erforderlich. Ab 7.1 kann Stream Deck seine Laufzeiten nachladen; vor einem Offline-Einsatz muss die Laufzeit vorhanden sein. Eine IT-Sperre wird nicht umgangen.
-- Benutzer darf eine entpackte Edge-Erweiterung und lokale `.streamDeckPlugin`-Pakete installieren. Port `29381` muss frei sein. Kein eingehender Netzwerk-Firewallport nötig.
-- Keine Installation von Node.js, npm, Python, PowerShell-Modulen oder zusätzlichem Windows-Dienst erforderlich. Der Build ist bereits erledigt.
-- Bestehende HeKI-/Grafana-Plugins bleiben installiert und behalten ihre Einstellungen, Lizenzen und Anmeldungen.
+1. Vollständiges ZIP in einen stabilen lokalen Ordner entpacken.
+2. `PageDeck-2.0.0.streamDeckPlugin` doppelklicken. Stream Deck übernimmt die Installation. Das Paket benötigt für Webseiten-Tasten keine eigenen Exportprofile.
+3. Unter `edge://extensions` die entpackte Erweiterung aus `edge-extension` laden. Unternehmensrichtlinien müssen dies erlauben.
+4. In Stream Deck ein eigenes Profil anlegen oder ein vorhandenes verwenden. Unter „PageDeck“ die Aktion „Verbindung / Pause“ auf eine freie Taste ziehen und im Editor auswählen.
+5. Im Einstellungsbereich „Neuen Kopplungscode erzeugen“ wählen. Die PageDeck-Erweiterung in Edge öffnen, „Stream Deck koppeln“ aufklappen und den Code innerhalb von zwei Minuten eingeben.
+6. „PageDeck → Webseiten-Taste“ auf jede gewünschte Taste ziehen. Anfangs entspricht ihre Nummer der Position im Gerät; im Einstellungsbereich kann die Nummer 1–32 frei gewählt werden. Die Nummern können auf verschiedenen Webseiten unterschiedliche Funktionen erhalten.
+7. In Edge „+ Webseite“ wählen. Eigene Domain oder Domain/Pfad angeben, Taste hinzufügen, Nummer und Beschriftung wählen, Schritte eintragen. „Website freigeben“ erteilt gezielten Zugriff für die eingetragene Domain; danach speichern.
+8. Die konfigurierte Webseite in Edge in den Vordergrund bringen. Die Beschriftung am Deck sollte erscheinen. Taste drücken und Seitenreaktion prüfen.
 
-ZIP vollständig in einen stabilen lokalen Ordner entpacken, zum Beispiel `%LOCALAPPDATA%\HeKI-AutoProfile-Paket`. Nicht aus der ZIP-Vorschau starten. Beim Verschieben der Erweiterung kann sich deren ID ändern; dann neu koppeln.
+Eine einfache Folge lautet: „Feld ausfüllen“, Selektor `input[name="q"]`, Text Ihrer Wahl; danach „Element klicken“, Selektor `button[type="submit"]`. Die Selektoren müssen zur konkreten Webseite passen. Sie lassen sich mit den Entwicklerwerkzeugen von Edge ermitteln. Ein grafischer Elementwähler ist noch nicht vorhanden.
 
-## 1. Originale sichern und Profilkopien exportieren
+## Update von 1.x
 
-1. Vorhandene Profile und eine vollständige Stream-Deck-Sicherung über die Oberfläche exportieren.
-2. Das BBB-Profil in der Oberfläche **duplizieren**, Kopie etwa `HeKI Auto BBB XL` nennen. Falls keine Duplizierung angeboten wird, ein neues XL-Testprofil anlegen und Aktionen über die Oberfläche kopieren. Das Original bleibt unverändert.
-3. Nur diese Kopie als `.streamDeckProfile` exportieren. Für den ersten Test genügt ein neues echtes XL-Profil mit gut sichtbarer Testaktion.
-4. Optional HeKI, Grafana, Speakr und Standardprofil ebenso vorbereiten. Drittplugin-Aktionen und Aktionssettings bleiben im Export enthalten. Globale Drittplugin-Einstellungen sind nicht zwangsläufig Teil des Exports; HeKI ändert sie nicht.
+Die Produktbezeichnung lautet jetzt PageDeck. Die technische Plugin-ID `de.heki.autoprofile` wird für die Updatefähigkeit beibehalten. Deshalb kann das Paket das bisher installierte Plugin aktualisieren und vorhandene Steueraktionen weiterverwenden. Benutzerprofile bleiben bestehen.
 
-Keine künstlich generierten Profile verwenden. Exportarchive werden als unveränderte Dateien behandelt; die interne Aktionsstruktur wird nicht interpretiert.
+Vor Änderungen eigene Profile wie gewohnt über Stream Deck sichern. Neues Plugin direkt installieren; für den dynamischen Webseiten-Modus **keine Profile exportieren oder Paketvorbereitung verwenden**. Edge-Dateien am bisherigen Erweiterungsort ersetzen, Erweiterung neu laden, Stream Deck vollständig beenden und neu starten. Oben im Einstellungsbereich muss „PageDeck 2.0.0“ erscheinen. Bei geänderter Erweiterungs-ID erneut koppeln.
 
-## 2. Persönliches Installationspaket in Edge erstellen
+Bisherige Profileinstellungen bleiben in Edge gespeichert, sind aber ab 2.0 nicht automatisch aktiv. Falls ausdrücklich gewünscht, kann „Optional: bisheriger Profilwechsel“ geöffnet und dort aktiviert werden. Dafür sind weiterhin eingebundene Exportprofile nötig. Die neue Webseiten-Funktion benötigt sie nicht.
 
-**Variante A – lokale Seite:** `Profile-Paket-erstellen.html` aus dem ZIP in Edge öffnen. Alle zugehörigen Dateien im Ordner belassen; Skripte und Kompressionsbibliothek liegen lokal bei. Die Seite benötigt keinen Server und stellt keine Netzwerkverbindungen her.
+## Optionaler Profilwechsel
 
-**Variante B – Erweiterungsseite:** Falls lokale HTML-Dateien gesperrt sind, zuerst die Edge-Erweiterung wie in Schritt 4 laden. In ihren Einstellungen „Eigene Exportprofile ohne Node.js in ein Installationspaket einbinden“ öffnen. Dieselbe Seite läuft dann innerhalb der Erweiterung. Keine Browserrichtlinien abschalten.
-
-1. In der Zeile BBB die exportierte `.streamDeckProfile`-Datei auswählen.
-2. Kennung `BBB` und Gerätetyp `Stream Deck XL · 32 Tasten` beibehalten. Anzeigename frei wählbar.
-3. Weitere Exporte bei Bedarf unter `HeKI`, `Grafana`, `Speakr`, `Standard` auswählen; andere Zeilen leer lassen. Zusätzliche Kennungen über „Weiteres Profil“ ergänzen. Der Administrator wählt den zum Export passenden Gerätetyp; im Betrieb prüft das SDK den tatsächlichen Typ. Keine Typerkennung über das undokumentierte Archivinnere.
-4. Beim ersten Paket Revision `1` verwenden. Für Änderungen eine höhere Revision als beim zuletzt installierten Paket wählen. Die Seite merkt sich nur diese Zahl, niemals Profilinhalte.
-5. „Installationspaket erstellen“, dann „Paket herunterladen“. Ergebnis zum Beispiel: `HeKI-AutoProfile-1.0.3.1.streamDeckPlugin`.
-
-Höchstens 32 Exporte, bis 50 MiB je Datei und 100 MiB insgesamt. Dateien bleiben lokal und werden bytegleich kopiert. Das persönliche Paket kann vertrauliche Settings enthalten: nicht öffentlich auf GitHub oder in Tickets hochladen.
-
-## 3. Wie ein reguläres Plugin installieren
-
-1. Die erzeugte `.streamDeckPlugin`-Datei **doppelklicken**. Die Dateizuordnung muss auf Stream Deck zeigen; bei Rückfrage Stream Deck als Anwendung wählen.
-2. Den Installationsdialog bestätigen. Ein angebotenes Update betrifft ausschließlich die Plugin-ID `de.heki.autoprofile`.
-3. Den Import der eigenen Profilkopien zulassen. Wird die Ersetzung eines Originalprofils angeboten, abbrechen und die exportierte Kopie prüfen.
-4. In Stream Deck ein **neues** Einrichtungsprofil erstellen. Die Aktion „HeKI Auto Profile → Automatik / Kopplung“ darauf platzieren und auswählen.
-5. Einen Kopplungscode im Einstellungsbereich erzeugen; er gilt zwei Minuten.
-
-Keine CMD-Datei und kein manueller Kopiervorgang in den Pluginordner erforderlich. Das beiliegende `HeKI-AutoProfile-1.0.3-Basis.streamDeckPlugin` wurde mit der offiziellen CLI erstellt. Es dient zur Installation/Verbindungsprüfung **ohne persönliche Profile**. Für BBB das persönliche Paket verwenden; die Basis nicht anschließend darüberinstallieren.
-
-Dies ist ein lokal verteiltes Plugin ohne Marketplace-Prüfung und Marketplace-DRM. Die öffentliche Plugin-API und die von Stream Deck verwaltete Laufzeit bleiben dieselben.
-
-## 4. Edge-Erweiterung installieren und koppeln
-
-1. `edge://extensions` öffnen, Entwicklermodus aktivieren.
-2. „Entpackte Erweiterung laden“ und `edge-extension` aus dem ZIP wählen.
-3. HeKI über das Erweiterungsmenü öffnen, bei Bedarf anheften.
-4. „Mit Stream Deck koppeln“ aufklappen, Code einfügen, koppeln.
-5. „Lokal verbunden“, SDK-Typ 2 und 8 × 4 müssen erscheinen. Fehlende Profile werden gemeldet.
-6. Optional für einen reinen BBB-Test `config\BBB-Prototyp.json` importieren und speichern. Sonst gelten die vier Anfangsregeln.
-
-Eine neue Kopplung ersetzt die vorherige. Nur ein Edge-Browserprofil gleichzeitig koppeln. InPrivate wird nicht unterstützt. Lokalen Netzwerkzugriff nur entsprechend der IT-Freigabe für diese Erweiterung zulassen; keine Unternehmensrichtlinien umgehen.
-
-## 5. Sichtbaren Wechsel prüfen
-
-Neutrales Startprofil im Host anzeigen, Edge fokussieren und BBB öffnen. Das echte BBB-Testprofil soll erscheinen. Zweiter BBB-Raum: kein zusätzlicher Wechsel. Danach HeKI, unbekannte Website, Outlook und Rückkehr zu Edge prüfen.
-
-Die Anzeige meldet „Profilbefehl gesendet“, weil die SDK-Promise keine Hardwarebestätigung liefert. Alle weiteren Fälle und kritischen Grenzen stehen im Hardware-Abnahmeprotokoll.
-
-Der Hintergrundendpunkt startet im Plugin-Einstiegspunkt. Ob der Host nach Neustart ohne sichtbare Aktion zuverlässig startet, ist auf der verwendeten Version zu prüfen. Alternative: **eigenes neues Startprofil** mit Steueraktion. Die Taste muss für automatische Wechsel nicht gedrückt werden. `Plugin-starten.cmd` sendet einen offiziellen passiven Deep-Link zur Diagnose, garantiert aber keinen universellen Autostart.
-
-## Update auf 1.0.3 bei fehlendem Kopplungscode
-
-Neues ZIP vollständig in einen eigenen Ordner entpacken. Mit dessen `Profile-Paket-erstellen.html` alle bisherigen persönlichen Exportprofile erneut auswählen und ein neues persönliches Paket erzeugen. Dieses Paket per Doppelklick über Stream Deck installieren. Der Basisinstaller enthält keine persönlichen Profile und ersetzt das persönliche Paket daher nicht.
-
-Stream Deck vollständig über das Symbol im Infobereich beenden, neu starten und die Aktion „Automatik / Kopplung“ im Editor auswählen. Die Oberfläche muss Version 1.0.3 zeigen; die Pluginversion beginnt mit 1.0.3. Auf „Neuen Kopplungscode erzeugen“ klicken. Bei weiterhin leerem Feld die PI-Statusmeldung und Versionszeile aus der [Fehlersuche](FEHLERSUCHE.md) verwenden.
+Die SDK-Schnittstelle kann nur mit dem Plugin registrierte Profile aktivieren. Ausschließlich hierfür gibt es noch `Profile-Paket-erstellen.html`: eigene Exportkopien auswählen, neues persönliches Paket erzeugen, über Stream Deck installieren und den optionalen Profilwechsel in Edge aktivieren. Das ist kein Zugriff auf beliebige Benutzerprofile nach deren Anzeigenamen.

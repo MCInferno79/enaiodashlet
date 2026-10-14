@@ -24,7 +24,7 @@ export async function personalize(base: Uint8Array, inputs: ExportFile[], revisi
   if (!manifestBytes || !catalogBytes || !files[ROOT + "bin/plugin.js"]) throw new Error("Basispaket unvollständig.");
   const manifest = JSON.parse(strFromU8(manifestBytes));
   const catalog: Profile[] = JSON.parse(strFromU8(catalogBytes));
-  if (manifest.UUID !== "de.heki.autoprofile" || manifest.CodePath !== "bin/plugin.js" || manifest.SDKVersion !== 2 || !/^\d+\.\d+\.\d+\.\d+$/.test(manifest.Version) || !Array.isArray(catalog)) throw new Error("Basispaket passt nicht zu dieser HeKI-Version.");
+  if (manifest.UUID !== "de.heki.autoprofile" || manifest.CodePath !== "bin/plugin.js" || manifest.SDKVersion !== 2 || !/^\d+\.\d+\.\d+\.\d+$/.test(manifest.Version) || !Array.isArray(catalog)) throw new Error("Basispaket passt nicht zu dieser PageDeck-Version.");
   const seen = new Set(catalog.map(p => p.key.toLowerCase() + ":" + p.deviceType));
   let total = 0;
   for (const input of inputs) {

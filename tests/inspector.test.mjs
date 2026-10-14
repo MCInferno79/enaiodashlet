@@ -4,7 +4,7 @@ import { moduleFor } from './helpers.mjs';
 const { inspectorMessages } = await moduleFor('plugin/inspector');
 function harness(overrides = {}) {
   const sent = [], logs = []; let count = 0;
-  const api = inspectorMessages({ isVisible: () => true, send: async p => { sent.push(p); }, status: () => ({ localServerReady: true, pluginVersion: '1.0.2.0' }), beginPairing: () => { count++; return { code: 'a'.repeat(48), expires: Date.now() + 120000 }; }, isServerReady: () => true, log: c => logs.push(c), ...overrides });
+  const api = inspectorMessages({ isVisible: () => true, send: async p => { sent.push(p); }, status: () => ({ localServerReady: true, pluginVersion: '2.0.0.0' }), beginPairing: () => { count++; return { code: 'a'.repeat(48), expires: Date.now() + 120000 }; }, isServerReady: () => true, log: c => logs.push(c), ...overrides });
   return { api, sent, logs, count: () => count };
 }
 test('Kopplungsantwort enthält Code, Ablaufzeit und dieselbe Anfragekennung', async () => {

@@ -11,7 +11,7 @@ const original=zipSync({'fixture.txt':strToU8('Testfixture: opaque foreign plugi
 const input={key:'BBB',label:'BBB / Besprechung',deviceType:2,fileName:'BBB.streamDeckProfile',bytes:original};
 const root='de.heki.autoprofile.sdPlugin/';
 test('CLI-ZIP64 wird verlustfrei normalisiert; Entpackgrenzen verhindern übergroße Puffer',async()=>{
-  const official=new Uint8Array(await readFile(`dist/no-node/HeKI-AutoProfile-${version}-Basis.streamDeckPlugin`));
+  const official=new Uint8Array(await readFile(`dist/no-node/PageDeck-${version}.streamDeckPlugin`));
   const reader=new ZipReader(new Uint8ArrayReader(official),{useWebWorkers:false});const normalized=unzipSync(base);
   try{for(const entry of await reader.getEntries())if(!entry.directory)assert.deepEqual(normalized[entry.filename],await entry.getData(new Uint8ArrayWriter()));}finally{await reader.close();}
   assert(Object.values(normalized).every(b=>b.buffer.byteLength<4*1024*1024));

@@ -1,6 +1,10 @@
 (() => {
-  const VERSION = '1.0.3';
+  const VERSION = '2.0.0';
   const ACTION = 'de.heki.autoprofile.control';
+  const WEB_ACTION = 'de.heki.autoprofile.web';
+  let actionSettings = {};
+  const slotSelect = document.querySelector('#slot');
+  if(slotSelect) { for(let slot=1;slot<=32;slot++){const option=document.createElement('option');option.value=String(slot);option.textContent=String(slot);slotSelect.append(option);} slotSelect.onchange=()=>{actionSettings={...actionSettings,slot:Number(slotSelect.value)};if(socket?.readyState===WebSocket.OPEN)socket.send(JSON.stringify({event:'setSettings',action:parameters.action,context:parameters.uuid,payload:actionSettings}));}; }
   const pair = document.querySelector('#pair');
   const code = document.querySelector('#code');
   const state = document.querySelector('#state');
@@ -48,6 +52,7 @@
   }
   function receive(event) {
     let message; try { message = JSON.parse(event.data); } catch { return; }
+    if(message.event==='didReceiveSettings' && [parameters.context,parameters.uuid].includes(message.context) && message.action===WEB_ACTION){actionSettings=message.payload?.settings||{};if(slotSelect)slotSelect.value=String(actionSettings.slot||1);return;}
     if (message.event !== 'sendToPropertyInspector' || ![parameters.context, parameters.uuid].includes(message.context) || (message.action && message.action !== parameters.action)) return;
     const p = message.payload;
     if (!p || typeof p !== 'object' || Array.isArray(p)) return;
@@ -95,7 +100,8 @@
         clearTimeout(connectTimer);
         try { current.send(JSON.stringify({ event: parameters.registerEvent, uuid: parameters.uuid })); }
         catch { disconnected(current); return; }
-        show('PI01', 'Stream Deck verbunden. Warte auf HeKI-Plugin …'); diagnostics(); send('status');
+        show('PI01', 'Stream Deck verbunden. Warte auf PageDeck-Plugin …'); diagnostics(); send('status');
+        if(parameters.action===WEB_ACTION)current.send(JSON.stringify({event:'getSettings',action:parameters.action,context:parameters.uuid}));
       };
       current.onmessage = event => { if (socket === current && !current.hekiFailed) receive(event); };
       current.onerror = current.onclose = () => disconnected(current);
@@ -109,7 +115,8 @@
     try {
       const action = JSON.parse(actionInfo), host = JSON.parse(info);
       if (!/^\d{1,5}$/.test(String(port)) || Number(port) < 1 || Number(port) > 65535 || typeof uuid !== 'string' || !uuid || typeof registerEvent !== 'string' || !registerEvent || typeof action.context !== 'string' || !action.context) throw new Error();
-      if (action.action !== ACTION) throw new Error();
+      if (![ACTION,WEB_ACTION].includes(action.action)) throw new Error();
+      if(action.action===WEB_ACTION){document.querySelector('#slot-section').hidden=false;actionSettings=action.payload?.settings||{};if(slotSelect)slotSelect.value=String(actionSettings.slot||1);}
       parameters = { port, uuid, registerEvent, context: action.context, action: action.action };
       hostVersion = host.application?.version || 'unbekannt'; attempt = 0; connect();
     } catch { pair.disabled = false; show('PI00', 'Ungültige Startdaten von Stream Deck. Aktion erneut auswählen oder Stream Deck neu starten.'); diagnostics(); }

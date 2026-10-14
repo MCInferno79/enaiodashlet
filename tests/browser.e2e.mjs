@@ -8,6 +8,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { until } from './helpers.mjs';
 await mkdir('work',{recursive:true});
+const fixture=JSON.parse(await readFile('tests/fixtures/legacy-config.json','utf8'));
 const temp=await mkdtemp(path.resolve('work/browser-'));
 const pluginRoot=temp+'/de.heki.autoprofile.sdPlugin';
 const messages=[],browserErrors=[],transports=[];let socket,child,context,worker;
@@ -27,6 +28,7 @@ try{
   send({event:'deviceDidConnect',device:'TEST-XL',deviceInfo:info.devices[0]});
   send({event:'willAppear',action:'de.heki.autoprofile.control',context:'control-test',device:'TEST-XL',payload:{controller:'Keypad',coordinates:{column:0,row:0},settings:{},isInMultiAction:false}});
   send({event:'propertyInspectorDidAppear',action:'de.heki.autoprofile.control',context:'control-test',device:'TEST-XL'});
+  await until(()=>messages.some(m=>m.payload?.localServerReady));
   send({event:'sendToPlugin',action:'de.heki.autoprofile.control',context:'control-test',payload:{command:'pair'}});
   const pairMessage=await until(()=>messages.find(m=>m.payload?.pairingCode));
   console.log('SDK-Host registriert, Kopplungscode über Property Inspector erzeugt.');
@@ -41,6 +43,7 @@ try{
   context.on('request',r=>{if(r.url().startsWith('http://127.0.0.1:29381'))transports.push(r.postData()??'');});
   worker=context.serviceWorkers()[0]??await context.waitForEvent('serviceworker',{timeout:8000});
   const id=new URL(worker.url()).hostname;
+  await worker.evaluate(config=>chrome.storage.local.set({config,profileSwitchingEnabled:true}),fixture);
   const page=await context.newPage();page.on('pageerror',e=>browserErrors.push(e.message));await page.goto(`chrome-extension://${id}/options.html`);
   await page.locator('summary').click();await page.locator('#pair-code').fill(pairMessage.payload.pairingCode);await page.locator('#pair').click();
   await until(async()=> (await page.locator('#feedback').textContent()).includes('erfolgreich'),7000);

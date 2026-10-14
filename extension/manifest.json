@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "HeKI Stream Deck Auto Profile Switcher",
-  "version": "1.0.3",
-  "description": "Schaltet lokale Stream-Deck-Plugin-Profile anhand des aktiven Edge-Tabs um.",
+  "name": "PageDeck",
+  "version": "2.0.0",
+  "description": "Verbindet frei belegbare Stream-Deck-Tasten mit Aktionen auf Ihren Webseiten.",
   "minimum_chrome_version": "120",
   "permissions": [
     "tabs",
     "storage",
     "alarms",
-    "webNavigation"
+    "webNavigation",
+    "scripting"
   ],
   "host_permissions": [
     "http://127.0.0.1/*"
@@ -18,15 +19,19 @@
     "type": "module"
   },
   "action": {
-    "default_title": "HeKI – Einstellungen und Status",
+    "default_title": "PageDeck – Einstellungen und Status",
     "default_icon": "icon.png"
   },
-  "options_page": "options.html",
+  "options_page": "workspaces.html",
   "incognito": "not_allowed",
   "icons": {
     "128": "icon.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:29381"
-  }
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:29381 ws://127.0.0.1:29381"
+  },
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
 }

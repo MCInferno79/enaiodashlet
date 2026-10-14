@@ -1,5 +1,4 @@
 @echo off
-echo Dieses Basispaket enthaelt noch keine persoenlichen Profile.
-echo Fuer BBB zuerst Profile-Paket-erstellen.html verwenden und das erzeugte Paket installieren.
-pause
-start "" "%~dp0HeKI-AutoProfile-1.0.3-Basis.streamDeckPlugin"
+setlocal
+echo PageDeck wird ueber den offiziellen Stream-Deck-Installer installiert.
+start "" "%~dp0PageDeck-2.0.0.streamDeckPlugin"

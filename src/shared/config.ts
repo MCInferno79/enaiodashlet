@@ -48,10 +48,5 @@ export function matchRule(rawUrl: string, rules: Rule[]): { rule?: Rule; host: s
 }
 export const DEFAULT_CONFIG: Config = {
   version: 1, paused: false, unknown: "release", defaultProfile: "", deviceIds: [],
-  rules: [
-    { id: "bbb", name: "BigBlueButton", pattern: "bbb.herten.de", profile: "BBB", priority: 100, enabled: true },
-    { id: "heki", name: "HeKI", pattern: "heki.herten.de", profile: "HeKI", priority: 100, enabled: true },
-    { id: "grafana", name: "HeKI / Grafana", pattern: "hekiport.vw.intern.herten.de", profile: "Grafana", priority: 100, enabled: true },
-    { id: "speakr", name: "Speakr", pattern: "speakr.vw.intern.herten.de", profile: "Speakr", priority: 100, enabled: true }
-  ]
+  rules: []
 };

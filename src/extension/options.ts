@@ -10,7 +10,7 @@ function fillProfiles(select: HTMLSelectElement, value: string, optional = false
   select.replaceChildren(); if (optional) select.append(option("", "Bitte auswählen"));
   const keys = new Set(catalog.map(p => p.key));
   if (value) keys.add(value);
-  if (!keys.size) keys.add("BBB");
+  if (!keys.size) select.append(option("", "Noch keine Profile eingebunden"));
   for (const key of keys) { const p = catalog.find(p => p.key === key); select.append(option(key, p ? `${p.label} [${key}]` : `${key} – noch nicht eingebunden`)); }
   select.value = value;
 }
@@ -58,14 +58,14 @@ async function updateStatus() {
 }
 function action(id: string, run: () => Promise<void> | void) { el(id).addEventListener("click", () => { Promise.resolve().then(run).catch(e => feedback(e.message)); }); }
 el<HTMLFormElement>("form").addEventListener("submit", e => { e.preventDefault(); void (async () => { config = validateConfig(collect()); await message({ type: "save", config }); feedback("Einstellungen gespeichert."); })().catch(e => feedback(e.message)); });
-action("add", () => { config = collect(); config.rules.push({ id: crypto.randomUUID(), name: "Neue Website", pattern: "example.org", profile: catalog[0]?.key ?? "BBB", priority: 0, enabled: true }); drawRules(); });
+action("add", () => { config = collect(); config.rules.push({ id: crypto.randomUUID(), name: "Neue Website", pattern: "example.org", profile: catalog[0]?.key ?? "", priority: 0, enabled: true }); drawRules(); });
 action("test", async () => { await message({ type: "refresh" }); feedback("Verbindungstest angefordert; Status wird automatisch aktualisiert."); });
 action("pause", async () => { config = validateConfig({ ...collect(), paused: !config.paused }); await message({ type: "save", config }); draw(); feedback(config.paused ? "Automatik pausiert." : "Automatik fortgesetzt."); });
 action("resume-plugin", async () => { await message({ type: "resume-plugin" }); feedback("Pause am Stream Deck aufgehoben."); });
 action("pair", async () => { await message({ type: "pair", code: el<HTMLInputElement>("pair-code").value.trim() }); el<HTMLInputElement>("pair-code").value = ""; feedback("Kopplung erfolgreich."); });
 action("export", () => {
   const clean = validateConfig(collect()); const url = URL.createObjectURL(new Blob([JSON.stringify(clean, null, 2)], { type: "application/json" }));
-  const a = document.createElement("a"); a.href = url; a.download = "heki-regeln.json"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); feedback("Konfiguration exportiert. Kopplungsschlüssel werden nicht exportiert.");
+  const a = document.createElement("a"); a.href = url; a.download = "pagedeck-regeln.json"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); feedback("Konfiguration exportiert. Kopplungsschlüssel werden nicht exportiert.");
 });
 el<HTMLInputElement>("import").addEventListener("change", e => { void (async () => {
   const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return;
@@ -73,5 +73,6 @@ el<HTMLInputElement>("import").addEventListener("change", e => { void (async () 
   config = validateConfig(JSON.parse(await file.text())); draw(); feedback("Konfiguration geprüft und geladen. Zum Übernehmen speichern.");
 })().catch(e => feedback(e.message)); });
 chrome.storage.onChanged.addListener((_changes, area) => { if (area === "session") void updateStatus().catch(e => feedback(e.message)); });
-const saved = await chrome.storage.local.get("config"); config = validateConfig(saved.config ?? DEFAULT_CONFIG); draw();
+el<HTMLInputElement>("legacy-enabled").onchange=()=>{void message({type:"profiles:enable",enabled:el<HTMLInputElement>("legacy-enabled").checked}).catch(e=>feedback(e.message));};
+const saved = await chrome.storage.local.get(["config","profileSwitchingEnabled"]);el<HTMLInputElement>("legacy-enabled").checked=saved.profileSwitchingEnabled===true; config = validateConfig(saved.config ?? DEFAULT_CONFIG); draw();
 await message({ type: "refresh" }); await updateStatus();

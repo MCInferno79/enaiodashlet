@@ -7,7 +7,7 @@ export const PORT = 29381;
 export type Credentials = { origin: string; token: string };
 const originRE = /^chrome-extension:\/\/[a-p]{32}$/;
 function equal(a: string, b: string) { const x = Buffer.from(a), y = Buffer.from(b); return x.length === y.length && timingSafeEqual(x, y); }
-export function createBridge(o: { controller: Controller; profiles: Profile[]; devices: () => Device[]; credentials?: Credentials; saveCredentials: (c: Credentials) => Promise<void>; savePaused: (p: boolean) => Promise<void>; port?: number }) {
+export function createBridge(o: { controller: Controller; profiles: Profile[]; devices: () => Device[]; credentials?: Credentials; saveCredentials: (c: Credentials) => Promise<void>; savePaused: (p: boolean) => Promise<void>; port?: number; credentialsChanged?: () => void; pausedChanged?: () => void }) {
   const port = o.port ?? PORT;
   let credentials = o.credentials;
   let pairing: { code: string; expires: number } | undefined;
@@ -42,7 +42,7 @@ export function createBridge(o: { controller: Controller; profiles: Profile[]; d
       const b = await body(req);
       if (!pairing || pairing.expires < Date.now() || typeof b?.code !== "string" || !equal(b.code, pairing.code)) return reply(res, 401, { error: "pair-denied" });
       const next = { origin, token: randomBytes(32).toString("hex") };
-      await o.saveCredentials(next); credentials = next; pairing = undefined; lastSequence = -1;
+      await o.saveCredentials(next); credentials = next; o.credentialsChanged?.(); pairing = undefined; lastSequence = -1;
       await o.controller.expire(); return reply(res, 200, { token: next.token });
     }
     if (!credentials || !equal(req.headers.authorization ?? "", `Bearer ${credentials.token}`)) return reply(res, 401, { error: "unauthorized" });
@@ -50,7 +50,7 @@ export function createBridge(o: { controller: Controller; profiles: Profile[]; d
     if (req.url === "/v1/status") return reply(res, 200, status());
     if (req.url === "/v1/pause") {
       if (typeof b?.paused !== "boolean") return reply(res, 400, { error: "invalid-pause" });
-      await o.savePaused(b.paused); await o.controller.setPaused(b.paused); return reply(res, 200, status());
+      await o.savePaused(b.paused); await o.controller.setPaused(b.paused); o.pausedChanged?.(); return reply(res, 200, status());
     }
     if (req.url !== "/v1/event") return reply(res, 404, { error: "not-found" });
     if (!b || b.instance !== instance) return reply(res, 409, { error: "instance-changed" });
@@ -69,6 +69,7 @@ export function createBridge(o: { controller: Controller; profiles: Profile[]; d
   watchdog.unref();
   return {
     server, status,
+    credentials: () => credentials,
     beginPairing() { pairing = { code: randomBytes(24).toString("hex"), expires: Date.now() + 120000 }; attempts = 0; windowStart = Date.now(); return pairing; },
     async listen() { await new Promise<void>((resolve, reject) => { const failed = (error: Error) => { server.removeListener("listening", ready); reject(error); }; const ready = () => { server.removeListener("error", failed); resolve(); }; server.once("error", failed); server.once("listening", ready); server.listen(port, "127.0.0.1"); }); },
     async close() { clearInterval(watchdog); await o.controller.expire(); await new Promise<void>(resolve => { server.close(() => resolve()); server.closeAllConnections(); }); }

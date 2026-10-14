@@ -16,14 +16,15 @@ try{
   page.on('request',r=>{if(/^https?:/.test(r.url())&&!r.url().startsWith(origin+'/'))network.push(r.url());});
   await context.route(/^https?:/,r=>r.request().url().startsWith(origin+'/')?r.continue():r.abort());
   await page.goto(process.env.HEKI_TEST_FILE_URL==='1'?pathToFileURL(path.resolve('dist/no-node/Profile-Paket-erstellen.html')).href:origin);
-  assert.equal(await page.locator('#profiles tr').count(),5);
+  assert.equal(await page.locator('#profiles tr').count(),1);
   await page.locator('#build').click();await page.locator('#status').getByText('Mindestens ein, höchstens 32 Exportprofile auswählen.').waitFor();
   const profile=zipSync({'fixture.txt':strToU8('Opaque test profile fixture, never shipped as a real Stream Deck profile.')});
+  await page.locator('#profiles tr').first().locator('input').first().fill('BBB');
   await page.locator('#profiles tr').first().locator('input[type=file]').setInputFiles({name:'BBB.streamDeckProfile',mimeType:'application/octet-stream',buffer:Buffer.from(profile)});
   await page.locator('#revision').fill('1');await page.locator('#build').click();
   try{await page.locator('#download').waitFor();}catch{throw new Error('Paketoberfläche: '+await page.locator('#status').textContent());}
   const downloadPromise=page.waitForEvent('download');await page.locator('#download').click();const download=await downloadPromise;
-  assert.equal(download.suggestedFilename(),`HeKI-AutoProfile-${version}.1.streamDeckPlugin`);
+  assert.equal(download.suggestedFilename(),`PageDeck-${version}.1.streamDeckPlugin`);
   const filename=temp+'/personalized.streamDeckPlugin';await download.saveAs(filename);
   const unpacked=unzipSync(new Uint8Array(await readFile(filename)));
   assert.deepEqual(unpacked['de.heki.autoprofile.sdPlugin/profiles/BBB-type2.streamDeckProfile'],profile);
