@@ -1,70 +1,56 @@
 # PageDeck
 
-**Version 2.0.0 · Ihre Webseiten. Ihre Tasten. Ihre Abläufe.**
+**Version 2.1.0 · Das vollständige Stream-Deck-Layout wechselt mit der aktiven Webseite.**
 
-PageDeck verbindet ein selbst erstelltes Stream-Deck-Profil mit frei konfigurierbaren Webseiten-Aktionen in Microsoft Edge. Die PageDeck-Tasten erhalten je nach aktiver Webseite andere Beschriftungen und Funktionen. Neue Webseiten und Abläufe ergänzen Sie in Edge; dafür brauchen Sie weder Profilexporte noch ein neues Pluginpaket.
+PageDeck erkennt den aktiven Tab im fokussierten Microsoft-Edge-Fenster und aktiviert automatisch das zugeordnete vollständige Stream-Deck-Profil. Sie erstellen die Layouts mit Ihren Hotkeys, Texteingaben, Makros und Plugin-Aktionen direkt in Stream Deck. Zum Wechseln ist kein Tastendruck nötig. Es sind keine Fachanwendungen oder aktiven Webseitenregeln vorgegeben.
 
 ## Herunterladen
 
-- **[PageDeck 2.0.0 – komplettes ZIP](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/PageDeck-2.0.0.zip)** – Stream-Deck-Installer, Edge-Erweiterung, Anleitung und Quellcode.
-- **[PageDeck-2.0.0.streamDeckPlugin](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/PageDeck-2.0.0.streamDeckPlugin)** – per Doppelklick direkt über Stream Deck installieren.
-- [SHA-256 des ZIPs](downloads/PageDeck-2.0.0.zip.sha256)
+- **[PageDeck 2.1.0 – komplettes ZIP](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/PageDeck-2.1.0.zip)** – lokale Profilvorbereitung, Edge-Erweiterung, Anleitung und Quellcode.
+- [SHA-256 des ZIPs](downloads/PageDeck-2.1.0.zip.sha256)
 
-Auf dem Benutzerrechner ist **keine separate Node.js-Installation** erforderlich. Stream Deck ab 7.1 stellt die Node.js-24-Plugin-Laufzeit bereit. Die Erweiterung benötigt Edge ab Chromium 120 und die Freigabe zum Laden entpackter Erweiterungen.
+Auf Ihrem PC ist **keine separate Node.js-Installation** nötig. Stream Deck ab 7.1 stellt die Plugin-Laufzeit bereit. Edge benötigt Chromium ab 120 sowie die Freigabe zum Laden entpackter Erweiterungen.
 
 ## Einrichtung
 
-1. ZIP vollständig entpacken. `PageDeck-2.0.0.streamDeckPlugin` doppelklicken und in Stream Deck installieren.
-2. Unter `edge://extensions` den Ordner `edge-extension` entpackt laden bzw. die bisherige Erweiterung am selben Ort aktualisieren und neu laden.
-3. In Stream Deck ein eigenes Profil erstellen oder ein vorhandenes verwenden. Eine PageDeck-Aktion **„Verbindung / Pause“** platzieren, auswählen und einen Kopplungscode erzeugen. In den PageDeck-Einstellungen in Edge damit koppeln.
-4. **„Webseiten-Taste“** auf die gewünschten Deck-Tasten ziehen. Die Tastennummer 1–32 wird anfangs aus der Position abgeleitet und kann im Einstellungsbereich geändert werden.
-5. In Edge **„+ Webseite“** wählen, Domain oder Domain/Pfad eintragen, eine Taste mit derselben Nummer hinzufügen und deren Schritte einrichten. Für Seitenzugriffe **„Website freigeben“** wählen und speichern.
-6. Die konfigurierte Webseite in den Vordergrund bringen und die Deck-Taste drücken. Normale Stream-Deck-Aktionen können Sie daneben weiterhin verwenden.
+1. ZIP vollständig entpacken und `START-HIER.html` öffnen.
+2. Ihre gewünschten Profile in Stream Deck erstellen, zur Sicherung duplizieren und die Kopien als `.streamDeckProfile` exportieren.
+3. `Profile-Paket-erstellen.html` in Edge öffnen, Exporte auswählen, eigene Profilkennungen vergeben und Gerätetyp **Stream Deck XL · 32 Tasten** wählen. Alle benötigten Profile in dasselbe Paket aufnehmen.
+4. Das erzeugte persönliche `.streamDeckPlugin` herunterladen und per Doppelklick über Stream Deck installieren. Die Profilkopien werden dabei eingebunden. Bereits benötigte Drittplugins müssen installiert sein.
+5. Unter `edge://extensions` die Erweiterung aus `edge-extension` entpackt laden. In einem Einrichtungsprofil die Aktion **PageDeck → Automatik / Kopplung** platzieren, im Editor auswählen und im Einstellungsbereich einen Kopplungscode erzeugen. In den PageDeck-Einstellungen in Edge damit koppeln.
+6. In Edge **„+ Neue Regel“** wählen, Domain oder Domain/Pfad eintragen und ein eingebundenes Profil auswählen. Speichern und die Webseite in den Vordergrund bringen: Das komplette Layout wechselt automatisch.
 
-## Aktionen
+Die Seite zur Profilvorbereitung arbeitet vollständig lokal, ohne Upload oder zusätzliche Programme. Falls lokale HTML-Dateien gesperrt sind, lässt sich dieselbe Seite über die Einstellungen der geladenen Edge-Erweiterung öffnen. Das zusätzlich enthaltene **Basisplugin** enthält noch keine persönlichen Profile; für den normalen Betrieb installieren Sie das selbst erzeugte Paket.
 
-| Aktion | Einstellung |
-|---|---|
-| Element klicken | CSS-Selektor, z. B. `#speichern` |
-| Feld ausfüllen | Selektor und Text; ersetzt den Feldinhalt |
-| Text einfügen | Text; ohne Selektor im fokussierten Eingabefeld |
-| Seiten-Tastenkürzel | z. B. `Control+Shift+k`, `Enter`; optional Zielselektor |
-| Scrollen | Pixelzahl, z. B. `600` oder `-600` |
-| Seite öffnen | vollständige HTTP(S)-Adresse; letzter Schritt der Folge |
+## Regeln und Layouts ändern
 
-Je Webseite sind 32 Tasten mit jeweils bis zu zehn Schritten möglich. Exakte Domains, Subdomains, Pfade, Prioritäten, Pause sowie JSON-Import/-Export werden unterstützt. Es gibt keine vorgegebenen Fachanwendungen oder aktiven Beispielregeln.
+Domainregeln unterstützen exakte Hosts, `*.example.org`, optionale Pfade, Prioritäten und eine Geräteauswahl. Unbekannte Seiten können das verwaltete Profil freigeben, beibehalten oder ein eingebundenes Standardprofil aktivieren. Beim Verlassen von Edge wird die Freigabe angefordert.
 
-**Seiten-Tastenkürzel sind synthetische DOM-Ereignisse.** Windows-/Browser-Hotkeys konfigurieren Sie als normale Hotkey-Aktion direkt in Stream Deck. Manche Webanwendungen akzeptieren synthetische Ereignisse nicht; geschützte Browserseiten, fremde Frames und besondere Editoren sind nicht allgemein steuerbar. CSS-Selektoren werden ausdrücklich konfiguriert; ein visueller Elementwähler ist noch nicht enthalten.
+Regeln für bereits eingebundene Profile ändern Sie direkt in Edge. Für zusätzliche Profile oder überarbeitete Exporte erzeugen Sie erneut ein persönliches Paket mit höherer Revision und installieren es. Wählen Sie dabei **alle weiter benötigten Exporte** aus. Bereits in Stream Deck bearbeitete Profilkopien vorher neu exportieren. Während der Profilbearbeitung die Automatik pausieren.
 
-## Eigene Stream-Deck-Profile
+Die [offizielle Elgato-Schnittstelle](https://docs.elgato.com/streamdeck/sdk/guides/profiles/#switching-to-a-profile) kann nur im Pluginpaket registrierte Profile aktivieren. Deshalb sind Export und persönliche Paketvorbereitung erforderlich. Sie kann den tatsächlichen Profilwechsel auch nicht bestätigen; der Status zeigt den Befehlsversand.
 
-Sie bearbeiten Ihr Deck-Profil und alle übrigen Tasten weiterhin direkt in Stream Deck. PageDeck verändert nur die eigenen Webseiten-Tasten.
+## Update
 
-Die [offizielle Elgato-Schnittstelle](https://docs.elgato.com/streamdeck/sdk/guides/profiles/#switching-to-a-profile) kann frei erstellte Benutzerprofile **weder auflisten noch direkt aktivieren**. Deshalb basiert der neue Betrieb auf wechselnden Tastenbelegungen innerhalb Ihres Profils. Der bisherige automatische Wechsel eingebundener Exportprofile bleibt auf einer separaten Einstellungsseite als ausdrücklich zu aktivierende Zusatzfunktion erhalten.
+Version 2.1 stellt den vollständigen automatischen Profilwechsel wieder her. Die Webseiten-Tasten aus 2.0 werden nicht mehr angeboten. Erstellen Sie mit der neuen Profilvorbereitung ein persönliches Paket und installieren Sie dieses. Die bloße Installation des leeren Basisplugins reicht für Layoutwechsel nicht aus.
 
-## Update von 1.x
+Edge-Dateien am bisherigen Erweiterungsort ersetzen und die Erweiterung neu laden. Stream Deck vollständig beenden und neu starten. Bestehende Profilregeln und die Kopplung bleiben bei unveränderter Erweiterungs-ID erhalten. Frühere 2.0-Tastenschritte werden nicht in native Profile umgewandelt; die Layouts richten Sie in Stream Deck ein. Die technischen Plugin-/Aktionskennungen bleiben für Updates stabil. Produktname, Oberfläche und neuer Datenordner heißen PageDeck.
 
-PageDeck ist der neue Produktname. Die technischen Plugin-/Aktionskennungen und der vorhandene Datenordner bleiben für das Update erhalten, damit bestehende Steueraktionen und Kopplungsdaten weiterverwendet werden können. Die bisherigen Domainregeln bleiben gespeichert; ihr automatischer Profilwechsel ist ab 2.0 standardmäßig ausgeschaltet. Bereits importierte Benutzerprofile werden nicht gelöscht.
+## Prüfungen
 
-Das neue vollständige Plugin direkt installieren; für den gewählten Webseiten-Modus **kein persönliches Profilpaket neu erzeugen**. Edge-Dateien am bisherigen Ort aktualisieren und neu laden, Stream Deck vollständig beenden und neu starten. Danach die neuen Webseiten-Tasten einrichten. Für deren Konfiguration öffnet PageDeck jetzt die neue Webseiten-Oberfläche.
+Automatisierte Prüfungen für Regeln, Kopplung, Update, offiziellen SDK-Befehlsversand und Paketvorbereitung sowie die offizielle Elgato-Validierung sind im [Testbericht](docs/TESTBERICHT.md) beschrieben. Windows, Edge und das echte XL-Gerät müssen vor Ort abgenommen werden. Der Stream-Deck-Host ist in den Integrationstests simuliert; echte Erweiterungsinstallation ist in der Entwicklungsumgebung administrativ gesperrt.
 
-## Nachweis und Grenzen
-
-TypeScript, automatisierte Kernprüfungen, offizielle Elgato-Validierung, Kopplungsprüfung und Chromium-Tests für Webseiten-Aktionen und die neue Oberfläche sind im [Testbericht](docs/TESTBERICHT.md) dokumentiert. Dabei sind Stream-Deck-Host und Chrome-Erweiterungs-APIs teilweise simuliert. Echtes Windows/Edge/XL und die Installation als entpackte Erweiterung müssen vor Ort geprüft werden; das tatsächliche Laden von Erweiterungen ist in dieser Entwicklungsumgebung administrativ blockiert.
-
-[Installation](docs/INSTALLATION.md) · [Bedienung](docs/BETRIEB.md) · [Architektur und Erweiterung](docs/ARCHITEKTUR.md) · [Sicherheit](docs/SICHERHEIT.md) · [Fehlersuche](docs/FEHLERSUCHE.md) · [Abnahme](docs/ABNAHME.md) · [Testbericht](docs/TESTBERICHT.md)
+[Installation](docs/INSTALLATION.md) · [Betrieb](docs/BETRIEB.md) · [Architektur](docs/ARCHITEKTUR.md) · [Sicherheit](docs/SICHERHEIT.md) · [Fehlersuche](docs/FEHLERSUCHE.md) · [Abnahme](docs/ABNAHME.md) · [Testbericht](docs/TESTBERICHT.md)
 
 ## Nur auf dem Buildrechner
 
 ```sh
 npm ci
 npm run verify
-npm run test:web
-npm run test:workspaces-ui
-npm run test:inspector
 npm run test:ui
 npm run test:packager
+npm run test:inspector
 npm run release
 ```
 
-Node.js ab 22 wird ausschließlich auf dem Buildrechner benötigt. Browserprüfungen benötigen Chromium; optional `HEKI_BROWSER_PATH` setzen. `test:browser` benötigt eine Umgebung, die das Laden echter Erweiterungen erlaubt. Exakte Abhängigkeiten stehen im Lockfile. Installiert wird das Plugin über den normalen Stream-Deck-Installer.
+Node.js ab 22 und die Entwicklerwerkzeuge werden ausschließlich auf dem Buildrechner benötigt. Browserprüfungen benötigen Chromium; optional `PAGEDECK_BROWSER_PATH` setzen. `test:browser` benötigt eine Umgebung, in der echte Erweiterungen geladen werden dürfen. Exakte Abhängigkeiten stehen im Lockfile. Auf Ihrem PC installiert Stream Deck das erzeugte Plugin wie andere lokal bereitgestellte Plugins; eine Marketplace-Veröffentlichung ist nicht enthalten.

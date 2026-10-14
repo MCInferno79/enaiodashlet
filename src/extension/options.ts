@@ -22,7 +22,7 @@ function drawRules() {
     const enabled = input("", "checkbox"); enabled.checked = rule.enabled; enabled.setAttribute("aria-label", `Regel ${index + 1} aktiviert`);
     const name = input(rule.name); name.maxLength = 100; name.required = true; name.setAttribute("aria-label", "Anzeigename");
     const pattern = input(rule.pattern); pattern.required = true; pattern.maxLength = 1024; pattern.setAttribute("aria-label", "Domain oder Pfadmuster");
-    const profile = document.createElement("select"); fillProfiles(profile, rule.profile); profile.setAttribute("aria-label", "Plugin-Profil");
+    const profile = document.createElement("select"); fillProfiles(profile, rule.profile); profile.required = true; profile.setAttribute("aria-label", "Plugin-Profil");
     const priority = input(String(rule.priority), "number"); priority.min = "-10000"; priority.max = "10000"; priority.required = true; priority.setAttribute("aria-label", "Priorität");
     const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Löschen";
     remove.addEventListener("click", () => { config = collect(); config.rules.splice(index, 1); drawRules(); });
@@ -73,6 +73,5 @@ el<HTMLInputElement>("import").addEventListener("change", e => { void (async () 
   config = validateConfig(JSON.parse(await file.text())); draw(); feedback("Konfiguration geprüft und geladen. Zum Übernehmen speichern.");
 })().catch(e => feedback(e.message)); });
 chrome.storage.onChanged.addListener((_changes, area) => { if (area === "session") void updateStatus().catch(e => feedback(e.message)); });
-el<HTMLInputElement>("legacy-enabled").onchange=()=>{void message({type:"profiles:enable",enabled:el<HTMLInputElement>("legacy-enabled").checked}).catch(e=>feedback(e.message));};
-const saved = await chrome.storage.local.get(["config","profileSwitchingEnabled"]);el<HTMLInputElement>("legacy-enabled").checked=saved.profileSwitchingEnabled===true; config = validateConfig(saved.config ?? DEFAULT_CONFIG); draw();
+const saved = await chrome.storage.local.get("config"); config = validateConfig(saved.config ?? DEFAULT_CONFIG); draw();
 await message({ type: "refresh" }); await updateStatus();

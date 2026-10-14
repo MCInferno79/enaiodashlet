@@ -1,23 +1,31 @@
-# PageDeck 2.0.0: Testbericht
+# PageDeck 2.1.0: Testbericht
 
-Prüfdatum 14.10.2026. Buildumgebung: Linux, Node.js 24.19.0, TypeScript 5.9.3, Elgato-SDK 3.0.2, CLI 1.10.2, Chromium. Auf dem Anwenderrechner wird keine separate Node-Installation benötigt.
+Stand 14.10.2026. Die Prüfungen beziehen sich auf das gebaute PageDeck-Paket. Die Hardware-Abnahme auf Windows und dem echten XL-Gerät ist offen.
 
-## Ausgeführte Prüfungen
+## Automatisierte Prüfung
 
-- `npm run check` und `npm run build`: strikte Typprüfung, SDK-Plugin, Edge-Oberflächen, Installer und optionale Profilvorbereitung.
-- `npm test`: **35 Tests**. Bestehende Matching-/Controller-/HTTP-/Kopplungs-/Paketprüfungen plus neutraler Start, neues Webseitenmodell, Domain-/Pfadzuordnung, Aktionsvalidierung, gepinnte Origin, WebSocket-Authentifizierung, Ausführung und veraltete/ungültige Belegungen.
-- `npm run validate` und `npm run validate:personalized`: offizielle Elgato-Validierung des direkten Installers sowie des weiterhin optionalen persönlichen Profilpakets.
-- `npm run test:web`: gebautes Plugin mit echtem SDK → SDK-Tastendruck → echtes authentifiziertes Loopback-HTTP/WebSocket → ausgeführter Erweiterungsworker → Chromium mit realem DOM. Geprüft: Feld füllen, Text an Auswahlposition einfügen, Seiten-Tastenkürzel, Klick, Scrollen, Tabnavigation, geänderte Tastennummer, Zurückweisung ungültiger Zahlenwerte ohne Datenverlust, abgelaufene Anfragen vor verzögerter DOM-Ausführung, Fokusverlust, fehlende Freigabe, Pause und keine Texte/Selektoren/URLs im Tastenprotokoll. Stream-Deck-Host und Chrome-Erweiterungs-APIs sind simuliert; die DOM-Ausführung findet im echten Browser statt.
-- `npm run test:workspaces-ui`: neutraler Start, Webseite anlegen, gezielte Origins-Freigabe, Taste, zwei Schritte und Speichern in der tatsächlich gerenderten neuen Oberfläche. Chrome-APIs simuliert.
-- `npm run test:inspector`: echtes UI-JavaScript und SDK-Plugin, Codeanzeige, erfolgreiches HTTP-Pairing, frühe Inspector-Anfrage, Timeout und anschließender erfolgreicher zweiter Klick. Hostrouting simuliert.
-- `npm run test:ui`: weiterhin vorhandene optionale Profilseite mit simuliertem chrome.*.
-- `npm run test:packager`: optionale lokale Profilvorbereitung; frei gewählte Kennung, Dateiübernahme, Download und unveränderte Exportbytes. Statische Testbereitstellung über HTTP.
-- `npm run test:reference -- work/sdpi-reference`: Nachrichtenvergleich mit separat ausgeführtem sdpi-StreamDeckClient auf Commit `bfd17677540da403e28ecc442110df77be4306ca`; Registrierung und Anfragen verwenden dieselbe UI-Kennung. Referenzcheckout wird nicht mitgeliefert.
+- `npm run verify`: TypeScript-Prüfung, vollständiger Build, 31 Kernprüfungen und offizielle Elgato-CLI-Validierung von Basisplugin und personalisiertem Testpaket.
+- Regelauswertung: neutraler Erststart, exakte Hosts, Subdomain-Grenzen, IDN, Pfadgrenzen, Prioritäten, deaktivierte Regeln und Eingabevalidierung.
+- Controller: Freigabe vor Profilwechsel, doppelte Ereignisse, fehlende Exporte, Geräteauswahl, Pause, Fokusverlust und überholte Aufträge.
+- Lokale HTTP-API: Origin/Host/Token, einmalige Kopplung, Rate-Limit, monotone Sequenzen, Dienstinstanz und Ablehnung unerwarteter Ereignisfelder.
+- MV3-Ereignisquellcode mit simulierten Chrome-APIs: aktives fokussiertes Fenster, SPA, Wiederverbindung, Neustart und vertrauliche URL-Bestandteile bleiben im Browser. Alte 2.0-Abschaltung verhindert den wiederhergestellten Profilwechsel nicht.
+- Tatsächlich gebautes Plugin mit offiziellem Elgato-SDK und echtem HTTP: Browserereignis führt über einen simulierten Stream-Deck-WebSocket-Host zu `switchToProfile`; zwischen verschiedenen Profilen steht eine Freigabe. Kein `keyDown` wird als Auslöser gesendet.
+- Tatsächlicher Pluginstart mit temporärem APPDATA: alte Kopplung und Pause werden zu PageDeck kopiert, neue Einstellungen beim nächsten Start erhalten und alte Dateien unverändert gelassen.
+- Persönliche Paketfunktion: Exportarchive bleiben bytegleich, Kennungen/Gerätetypen werden geprüft, Manifestprofile registriert und CLI-ZIP64 verlustfrei für den Browser normalisiert. Die Testarchive sind ausdrücklich keine echten Hardwareprofile.
+- Kopplungsoberfläche: SDK-Registrierung, UI-Kontextrouting, frühe Antworten, Request-IDs, Timeouts, erneuter Versuch und Freigabe des Buttons bei fehlender Antwort.
 
-## Praktische Grenzen
+## Chromium-Prüfungen
 
-Das Laden einer echten entpackten Erweiterung sowie direkter file://-Zugriff sind in dieser Entwicklungsumgebung durch die Browseradministration gesperrt. Diese Regeln werden nicht umgangen. Die verfügbaren Tests verwenden deshalb echte Webseiten mit simulierten Erweiterungs-APIs bzw. den ausgeführten Workerquellcode. Ein bestandener Test bestätigt keine reale Windows-/Edge-/XL-Installation.
+`npm run test:ui` prüft die tatsächlich gerenderte Regeloberfläche: neutraler Start, Regel anlegen/löschen, Domain einem Profil zuordnen, speichern und pausieren. Chrome-APIs sind dabei simuliert. `docs/Optionsvorschau.png` stammt aus dieser Testvorschau.
 
-Offen sind die Hardwareabnahme, Installation/Update über die Windows-Anwendung, Live-Beschriftung am realen Deck, Freigabedialoge im tatsächlichen Edge, Zuverlässigkeit auf den Zielwebseiten, besondere Editoren/Frames, Unternehmensrichtlinien und Neustarts auf dem Zielrechner. Seiten-Tastenkürzel sind synthetische DOM-Ereignisse und keine Windows-/Browser-Hotkeys.
+`npm run test:packager` wählt ein ausdrücklich künstliches Exportarchiv aus, erzeugt den persönlichen Installer, lädt ihn herunter und prüft die bytegleiche Kopie und XL-Manifestregistrierung. Es werden keine externen HTTP(S)-Anfragen gestellt. Die statischen Dateien werden durch einen lokalen Testserver bereitgestellt.
 
-Die im neuen Modus benötigten Webseiten und Aktionen werden vollständig vom Anwender angelegt. Testseiten und alte Fachanwendungsregeln sind ausschließlich Fixtures und werden nicht als aktive Produktvorgaben ausgeliefert.
+`npm run test:inspector` verbindet die reale gerenderte Kopplungsoberfläche mit dem tatsächlich gebauten Plugin über einen simulierten Stream-Deck-Host. Erzeugter Code, HTTP-Kopplung, erneuter Versuch und Versionsanzeige werden geprüft.
+
+`npm run test:reference -- work/sdpi-reference` vergleicht die ausgehende SDK-UI-Registrierung und Anfragestruktur mit dem ausgeführten empfohlenen sdpi-Referenzclient. Der Referenzstand ist im Prüfskript festgehalten.
+
+## Grenzen
+
+In dieser Umgebung sind die Installation echter Erweiterungen und Tests lokaler `file://`-Seiten administrativ gesperrt. Diese Sperren werden nicht umgangen. `test:browser` ist deshalb hier kein bestandener Nachweis. Gewöhnliche HTTP-Seiten, der kompilierte MV3-Ereignisquellcode und die dokumentierten Hostsimulationen werden separat geprüft.
+
+Es liegt kein echter persönlicher `.streamDeckProfile`-Export des Benutzers vor. Im öffentlichen Basisinstaller sind daher keine Layouts erfunden oder als echte Profile ausgegeben. Die tatsächliche Doppelklick-Installation, der Profilimport und das sichtbare automatische Layout auf Windows/Edge/XL bleiben gemäß `ABNAHME.md` vor Ort zu prüfen. Der SDK-Test bestätigt den Befehlsversand, nicht die sichtbare Hardwareanzeige.

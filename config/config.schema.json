@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:pagedeck:legacy-profiles:v1",
-  "title": "PageDeck: optionaler Profilwechsel", "type": "object", "additionalProperties": false,
+  "$id": "urn:pagedeck:profiles:v1",
+  "title": "PageDeck: automatischer Profilwechsel", "type": "object", "additionalProperties": false,
   "required": ["version", "paused", "unknown", "defaultProfile", "deviceIds", "rules"],
   "properties": {
     "version": { "const": 1 }, "paused": { "type": "boolean" },

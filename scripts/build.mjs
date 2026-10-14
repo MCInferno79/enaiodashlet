@@ -9,8 +9,8 @@ const out='dist/de.heki.autoprofile.sdPlugin';
 await rm('dist',{recursive:true,force:true}); await mkdir('dist',{recursive:true});
 await cp('plugin',out,{recursive:true}); await cp('profiles',out+'/profiles',{recursive:true});
 await cp('extension','dist/edge-extension',{recursive:true});
-await build({ entryPoints:['src/plugin/index.ts'], outfile:out+'/bin/plugin.js', platform:'node', target:'node24', format:'esm', bundle:true, banner:{js:'import { createRequire as __hekiCreateRequire } from "node:module"; const require = __hekiCreateRequire(import.meta.url);'}, legalComments:'linked' });
-for(const name of ['worker','options','workspaces']) await build({entryPoints:[`src/extension/${name==='workspaces'?'workspaces-ui':name}.ts`],outfile:`dist/edge-extension/${name}.js`,bundle:true,format:'esm',platform:'browser',target:'chrome120',legalComments:'linked'});
+await build({ entryPoints:['src/plugin/index.ts'], outfile:out+'/bin/plugin.js', platform:'node', target:'node24', format:'esm', bundle:true, banner:{js:'import { createRequire as __pageDeckCreateRequire } from "node:module"; const require = __pageDeckCreateRequire(import.meta.url);'}, legalComments:'linked' });
+for(const name of ['worker','options']) await build({entryPoints:[`src/extension/${name}.ts`],outfile:`dist/edge-extension/${name}.js`,bundle:true,format:'esm',platform:'browser',target:'chrome120',legalComments:'linked'});
 // Small original PNG artwork; generated during build without network resources.
 function png(size, plain=false) {
   const crc32=b=>{let c=0xffffffff;for(const x of b){c^=x;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;};
@@ -33,7 +33,7 @@ await writeFile(out+'/THIRD-PARTY-NOTICES.md',await noticesFor(['@elgato/streamd
 await mkdir('dist/no-node',{recursive:true});
 await promisify(execFile)(process.execPath,['node_modules/@elgato/cli/bin/streamdeck.mjs','pack',out,'--output','dist/no-node','--no-update-check','--no-file-list','--force']);
 const official=await readFile('dist/no-node/de.heki.autoprofile.streamDeckPlugin');
-await writeFile(`dist/no-node/PageDeck-${version}.streamDeckPlugin`,official);
+await writeFile(`dist/no-node/PageDeck-${version}-Basis.streamDeckPlugin`,official);
 await rm('dist/no-node/de.heki.autoprofile.streamDeckPlugin');
 await cp('packager','dist/no-node',{recursive:true});
 // Official CLI emits ZIP64 even for tiny files. Read it with the same ZIP library
@@ -43,7 +43,7 @@ const seedEntries={};
 for(const entry of await reader.getEntries())if(!entry.directory)seedEntries[entry.filename]=[await entry.getData(new Uint8ArrayWriter()),{mtime:new Date('2026-01-01T00:00:00Z')}];
 await reader.close();
 const seed=zipSync(seedEntries,{level:6});await writeFile('dist/packager-base.zip',seed);
-await build({entryPoints:['src/packager/ui.ts'],outfile:'dist/no-node/profile-packager.js',bundle:true,format:'iife',platform:'browser',target:'chrome120',define:{HEKI_BASE_PACKAGE:JSON.stringify(Buffer.from(seed).toString('base64'))},legalComments:'linked'});
+await build({entryPoints:['src/packager/ui.ts'],outfile:'dist/no-node/profile-packager.js',bundle:true,format:'iife',platform:'browser',target:'chrome120',define:{PAGEDECK_BASE_PACKAGE:JSON.stringify(Buffer.from(seed).toString('base64'))},legalComments:'linked'});
 for(const file of ['Profile-Paket-erstellen.html','profile-packager.css','profile-packager.js','profile-packager.js.LEGAL.txt']){
   try{await cp('dist/no-node/'+file,'dist/edge-extension/'+file);}catch(e){if(e.code!=='ENOENT')throw e;}
 }

@@ -1,5 +1,5 @@
 import { personalize, type ExportFile } from "./package";
-declare const HEKI_BASE_PACKAGE: string;
+declare const PAGEDECK_BASE_PACKAGE: string;
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const feedback = (text: string) => { el("status").textContent = text; };
 let busy = false;
@@ -19,7 +19,7 @@ function row(key: string, label: string) {
 }
 row("Website", "Meine Website");
 el("add").addEventListener("click", () => { if (!busy && el("profiles").children.length < 32) row("", ""); });
-try { el<HTMLInputElement>("revision").value = String(Math.min(65535, Math.max(1, Number(localStorage.getItem("heki-package-revision") ?? 0) + 1))); } catch { /* Local file storage can be disabled by policy. */ }
+try { el<HTMLInputElement>("revision").value = String(Math.min(65535, Math.max(1, Number(localStorage.getItem("pagedeck-package-revision") ?? 0) + 1))); } catch { /* Local file storage can be disabled by policy. */ }
 el("build").addEventListener("click", () => { void build().catch(e => feedback(e instanceof Error ? e.message : "Paket konnte nicht erstellt werden.")); });
 async function build() {
   if (busy) return; busy = true;
@@ -37,7 +37,7 @@ async function build() {
       if (file.size > 50 * 1024 * 1024 || total > 100 * 1024 * 1024) throw new Error("Höchstens 50 MiB je Profil und 100 MiB insgesamt auswählen.");
       inputs.push({ key: controls[0]!.value.trim(), label: controls[1]!.value.trim(), deviceType: Number(tr.querySelector("select")!.value), fileName: file.name, bytes: new Uint8Array(await file.arrayBuffer()) });
     }
-    const base = Uint8Array.from(atob(HEKI_BASE_PACKAGE), c => c.charCodeAt(0));
+    const base = Uint8Array.from(atob(PAGEDECK_BASE_PACKAGE), c => c.charCodeAt(0));
     const revision = Number(el<HTMLInputElement>("revision").value);
     const result = await personalize(base, inputs, revision);
     const link = el<HTMLAnchorElement>("download");
@@ -45,6 +45,6 @@ async function build() {
     link.href = URL.createObjectURL(new Blob([new Uint8Array(result.bytes)], { type: "application/octet-stream" }));
     link.download = `PageDeck-${result.version}.streamDeckPlugin`; link.hidden = false;
     feedback(`Paket ${result.version} mit ${result.profiles.length} Profil(en) fertig. Jetzt herunterladen und die .streamDeckPlugin-Datei per Doppelklick in Stream Deck installieren.`);
-    try { localStorage.setItem("heki-package-revision", String(revision)); } catch { /* Only this non-sensitive number is remembered, never files or their contents. */ }
+    try { localStorage.setItem("pagedeck-package-revision", String(revision)); } catch { /* Only this non-sensitive number is remembered, never files or their contents. */ }
   } finally { busy = false; controls.forEach(c => { c.disabled = false; }); }
 }

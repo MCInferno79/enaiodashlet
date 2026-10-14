@@ -1,26 +1,37 @@
-# PageDeck installieren
+# PageDeck 2.1: Installation ohne separate Node.js-Installation
 
-Version 2.0.0, Stand 14.10.2026. Windows, Microsoft Edge und Stream Deck; das XL besitzt 32 Tasten. Stream Deck mindestens 7.1 mit verfügbarer Node.js-24-Plugin-Laufzeit. **Keine separate Node-Installation und kein zusätzlicher Windows-Dienst.**
+## Voraussetzungen
 
-1. Vollständiges ZIP in einen stabilen lokalen Ordner entpacken.
-2. `PageDeck-2.0.0.streamDeckPlugin` doppelklicken. Stream Deck übernimmt die Installation. Das Paket benötigt für Webseiten-Tasten keine eigenen Exportprofile.
-3. Unter `edge://extensions` die entpackte Erweiterung aus `edge-extension` laden. Unternehmensrichtlinien müssen dies erlauben.
-4. In Stream Deck ein eigenes Profil anlegen oder ein vorhandenes verwenden. Unter „PageDeck“ die Aktion „Verbindung / Pause“ auf eine freie Taste ziehen und im Editor auswählen.
-5. Im Einstellungsbereich „Neuen Kopplungscode erzeugen“ wählen. Die PageDeck-Erweiterung in Edge öffnen, „Stream Deck koppeln“ aufklappen und den Code innerhalb von zwei Minuten eingeben.
-6. „PageDeck → Webseiten-Taste“ auf jede gewünschte Taste ziehen. Anfangs entspricht ihre Nummer der Position im Gerät; im Einstellungsbereich kann die Nummer 1–32 frei gewählt werden. Die Nummern können auf verschiedenen Webseiten unterschiedliche Funktionen erhalten.
-7. In Edge „+ Webseite“ wählen. Eigene Domain oder Domain/Pfad angeben, Taste hinzufügen, Nummer und Beschriftung wählen, Schritte eintragen. „Website freigeben“ erteilt gezielten Zugriff für die eingetragene Domain; danach speichern.
-8. Die konfigurierte Webseite in Edge in den Vordergrund bringen. Die Beschriftung am Deck sollte erscheinen. Taste drücken und Seitenreaktion prüfen.
+Windows 10 oder neuer, Stream Deck ab 7.1 mit der verwalteten Node.js-24-Plugin-Laufzeit und Edge ab Chromium 120. Für den Benutzerrechner sind weder npm noch eine eigene Node-Installation oder PowerShell-Buildbefehle nötig. Unternehmensrichtlinien müssen die entpackte Edge-Erweiterung und den lokalen Zugriff erlauben. Das Zielgerät ist Stream Deck XL mit 32 Tasten, SDK-Typ 2.
 
-Eine einfache Folge lautet: „Feld ausfüllen“, Selektor `input[name="q"]`, Text Ihrer Wahl; danach „Element klicken“, Selektor `button[type="submit"]`. Die Selektoren müssen zur konkreten Webseite passen. Sie lassen sich mit den Entwicklerwerkzeugen von Edge ermitteln. Ein grafischer Elementwähler ist noch nicht vorhanden.
+## Persönliches Plugin vorbereiten
 
-## Update von 1.x
+1. ZIP vollständig in einen dauerhaften lokalen Ordner entpacken. `START-HIER.html` enthält die Anleitung.
+2. Die gewünschten vollständigen Layouts in Stream Deck erstellen. Dort richten Sie Hotkeys, Texteingaben, Makros, Ordner und Aktionen Ihrer installierten Plugins ein. Originalprofile zur Sicherung duplizieren und die Kopien als `.streamDeckProfile` exportieren.
+3. `Profile-Paket-erstellen.html` in Edge öffnen. Je Export eine eindeutige Profilkennung, einen Anzeigenamen, den richtigen Gerätetyp und die Datei wählen. Die Kennung darf Buchstaben, Zahlen, Bindestrich und Unterstrich enthalten, z. B. `Meeting` oder `Portal`. Sie ist später das Ziel der Website-Regel.
+4. Für das erste Paket Revision 1 verwenden, „Installationspaket erstellen“ wählen und das Paket herunterladen. Die Exportarchive bleiben bytegleich und werden nicht hochgeladen.
+5. Das erzeugte persönliche `PageDeck-2.1.0.1.streamDeckPlugin` doppelklicken und die Installation einschließlich eigener Profilkopien bestätigen. Erforderliche Drittplugins separat über Stream Deck installieren.
 
-Die Produktbezeichnung lautet jetzt PageDeck. Die technische Plugin-ID `de.heki.autoprofile` wird für die Updatefähigkeit beibehalten. Deshalb kann das Paket das bisher installierte Plugin aktualisieren und vorhandene Steueraktionen weiterverwenden. Benutzerprofile bleiben bestehen.
+Alle weiter benötigten Exporte gehören gemeinsam in dasselbe Paket. Ein neues Paket mit nur einem Profil enthält auch nur dieses Profil. Maximal 32 Exporte, 50 MiB je Datei und 100 MiB insgesamt. Gerätetyp und Export müssen zueinander passen; die lokale Vorbereitung untersucht das innere Profilformat absichtlich nicht.
 
-Vor Änderungen eigene Profile wie gewohnt über Stream Deck sichern. Neues Plugin direkt installieren; für den dynamischen Webseiten-Modus **keine Profile exportieren oder Paketvorbereitung verwenden**. Edge-Dateien am bisherigen Erweiterungsort ersetzen, Erweiterung neu laden, Stream Deck vollständig beenden und neu starten. Oben im Einstellungsbereich muss „PageDeck 2.0.0“ erscheinen. Bei geänderter Erweiterungs-ID erneut koppeln.
+Das beigefügte `PageDeck-2.1.0-Basis.streamDeckPlugin` dient nur der Kopplungsdiagnose, solange noch keine Exporte vorliegen. Es enthält keine fertigen Layouts. Für den normalen Betrieb installieren Sie das persönliche Paket. Installieren Sie das leere Basisplugin nicht nach einem persönlichen Paket.
 
-Bisherige Profileinstellungen bleiben in Edge gespeichert, sind aber ab 2.0 nicht automatisch aktiv. Falls ausdrücklich gewünscht, kann „Optional: bisheriger Profilwechsel“ geöffnet und dort aktiviert werden. Dafür sind weiterhin eingebundene Exportprofile nötig. Die neue Webseiten-Funktion benötigt sie nicht.
+## Edge einrichten und koppeln
 
-## Optionaler Profilwechsel
+1. `edge://extensions` öffnen, Entwicklermodus aktivieren und „Entpackte Erweiterung laden“ wählen. Den Ordner `edge-extension` auswählen. Sperren durch Unternehmensrichtlinien müssen von Ihrer IT freigegeben werden.
+2. In einem neutralen Einrichtungsprofil die Aktion **PageDeck → Automatik / Kopplung** platzieren. Im Stream-Deck-Editor auswählen; der Einstellungsbereich muss Oberfläche 2.1.0, Plugin 2.1.0.x und „Lokaler Dienst: bereit“ anzeigen.
+3. Dort „Neuen Kopplungscode erzeugen“ wählen. Code anklicken und mit Strg+C kopieren. Innerhalb von zwei Minuten in den PageDeck-Einstellungen in Edge unter „Mit Stream Deck koppeln“ einfügen und koppeln.
+4. „+ Neue Regel“ wählen, die eigene Domain eintragen, das eingebundene Profil auswählen und speichern. Beispiel: `meet.example.org` → `Meeting`.
+5. Die Webseite in Edge öffnen und in den Vordergrund bringen. Das vollständige Layout soll ohne Tastendruck wechseln. Eine zweite Regel und Webseite prüfen.
 
-Die SDK-Schnittstelle kann nur mit dem Plugin registrierte Profile aktivieren. Ausschließlich hierfür gibt es noch `Profile-Paket-erstellen.html`: eigene Exportkopien auswählen, neues persönliches Paket erzeugen, über Stream Deck installieren und den optionalen Profilwechsel in Edge aktivieren. Das ist kein Zugriff auf beliebige Benutzerprofile nach deren Anzeigenamen.
+Der Knopf auf dem physischen Deck pausiert oder aktiviert die Automatik. Er löst keinen manuellen Seitenwechsel aus. Die Kopplungsaktion wird für den laufenden Wechsel nicht in jedem Layout benötigt. Ein Einrichtungsprofil zum erneuten Koppeln behalten.
+
+Wenn lokale HTML-Dateien nicht ausgeführt werden dürfen: Zuerst die Edge-Erweiterung laden und über ihre Einstellungen die enthaltene Profilvorbereitung öffnen. Diese enthält dieselbe lokale Paketfunktion.
+
+## Update von früheren Versionen
+
+Vor Änderungen eigene Profile und die Edge-Regeln exportieren. Mit der neuen Profilvorbereitung ein Paket mit allen gewünschten Exporten erstellen und installieren. Edge-Dateien im bisher geladenen Ordner ersetzen, die Erweiterung neu laden und Stream Deck vollständig beenden und neu starten.
+
+Die technische Plugin-ID `de.heki.autoprofile` und die Steueraktions-ID bleiben ausschließlich für bestehende Installationen stabil. Die Anzeige lautet PageDeck. Bestehende Kopplung und Pause werden in den neuen Datenordner `%APPDATA%\PageDeck` kopiert, sofern dort noch keine Einstellungen liegen. Die bisherigen Dateien bleiben erhalten.
+
+Die 1.x-Profilregeln bleiben nutzbar. Die zusätzliche Abschaltung des Profilwechsels in 2.0 wird nicht mehr ausgewertet. Die 2.0-Webseiten-Tasten werden entfernt; gespeicherte Tastenfolgen sind keine nativen Profile und werden nicht automatisch umgewandelt. Bei geänderter Erweiterungs-ID erneut koppeln. Eine aktive Pause bleibt erhalten und muss bei Bedarf aufgehoben werden.

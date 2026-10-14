@@ -3,8 +3,8 @@
   "UUID": "de.heki.autoprofile",
   "Name": "PageDeck",
   "Author": "PageDeck",
-  "Version": "2.0.0.0",
-  "Description": "Universelle Webseiten-Aktionen und dynamische Tasten für Microsoft Edge.",
+  "Version": "2.1.0.0",
+  "Description": "Wechselt das komplette Stream-Deck-Profil automatisch anhand des aktiven Edge-Tabs.",
   "Category": "PageDeck",
   "CategoryIcon": "assets/category",
   "Icon": "assets/plugin",
@@ -25,8 +25,8 @@
   "Actions": [
     {
       "UUID": "de.heki.autoprofile.control",
-      "Name": "Verbindung / Pause",
-      "Tooltip": "PageDeck koppeln und die Automatik pausieren.",
+      "Name": "Automatik / Kopplung",
+      "Tooltip": "Automatik pausieren oder fortsetzen. Kopplung im Einstellungsbereich.",
       "Icon": "assets/action",
       "PropertyInspectorPath": "ui/index.html",
       "Controllers": [
@@ -37,23 +37,6 @@
           "Image": "assets/key",
           "TitleAlignment": "middle",
           "FontSize": 12
-        }
-      ]
-    },
-    {
-      "UUID": "de.heki.autoprofile.web",
-      "Name": "Webseiten-Taste",
-      "Tooltip": "Führt die für diese Tastennummer und Webseite hinterlegte Aktion aus.",
-      "Icon": "assets/action",
-      "PropertyInspectorPath": "ui/index.html",
-      "Controllers": [
-        "Keypad"
-      ],
-      "States": [
-        {
-          "Image": "assets/key",
-          "TitleAlignment": "middle",
-          "FontSize": 10
         }
       ]
     }

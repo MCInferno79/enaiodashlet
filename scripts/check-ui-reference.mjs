@@ -26,14 +26,14 @@ const actionInfo = { action: 'de.heki.autoprofile.control', context: 'action-con
 await reference.connect('12345', 'ui-registration-uuid', 'registerPropertyInspector', {}, actionInfo);
 referenceEnv.connections[0].open();
 const nodes = Object.fromEntries(['pair', 'code', 'state', 'diagnostic', 'status'].map(id => [id, { disabled: false, value: '', textContent: '', select() {} }]));
-const hekiEnv = environment(), hekiWindow = {};
-vm.runInNewContext(await readFile('plugin/ui/pi.js', 'utf8'), { ...hekiEnv, window: hekiWindow, document: { querySelector: id => nodes[id.slice(1)] } });
-hekiWindow.connectElgatoStreamDeckSocket('12345', 'ui-registration-uuid', 'registerPropertyInspector', '{}', JSON.stringify(actionInfo));
-const heki = hekiEnv.connections[0]; heki.open();
-assert.deepEqual(heki.sent[0], referenceEnv.connections[0].sent[0]);
+const pageDeckEnv = environment(), pageDeckWindow = {};
+vm.runInNewContext(await readFile('plugin/ui/pi.js', 'utf8'), { ...pageDeckEnv, window: pageDeckWindow, document: { querySelector: id => nodes[id.slice(1)] } });
+pageDeckWindow.connectElgatoStreamDeckSocket('12345', 'ui-registration-uuid', 'registerPropertyInspector', '{}', JSON.stringify(actionInfo));
+const pageDeck = pageDeckEnv.connections[0]; pageDeck.open();
+assert.deepEqual(pageDeck.sent[0], referenceEnv.connections[0].sent[0]);
 for (const command of ['status', 'pair']) {
   if (command === 'pair') nodes.pair.onclick();
-  const message = heki.sent.at(-1); await reference.send('sendToPlugin', message.payload);
+  const message = pageDeck.sent.at(-1); await reference.send('sendToPlugin', message.payload);
   assert.deepEqual(message, referenceEnv.connections[0].sent.at(-1));
 }
 console.log('Unabhängiger Referenzvergleich bestanden: Registrierung, Status- und Code-Anforderung entsprechen dem sdpi StreamDeckClient (Commit bfd17677540da403e28ecc442110df77be4306ca). UI-UUID und Aktionskontext sind im Test verschieden.');

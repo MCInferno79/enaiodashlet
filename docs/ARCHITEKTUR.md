@@ -1,49 +1,45 @@
 # PageDeck: Architektur und Erweiterung
 
-PageDeck trennt Webseitenkonfiguration und Seitenaktionen vom Stream-Deck-Profil. Die frei platzierten Plugin-Tasten besitzen nur eine Nummer. Die Edge-Erweiterung ordnet diese Nummer anhand der aktiven Webseite einer Beschriftung und Schrittfolge zu.
+## Ablauf
 
 ```text
-Fokussierter Edge-Tab
-  → URL-Regel und Webseitenkonfiguration in Edge
-  → lokale WebSocket-Verbindung: opaque Kontextkennung + Tastennummern/Labels
-  → offizielles Elgato-SDK: Beschriftung der sichtbaren PageDeck-Tasten
-
-Physischer Tastendruck
-  → offizielles SDK → lokale Verbindung: Kontextkennung + Tastennummer
-  → erneute Fokus-, URL-, Konfigurations- und Berechtigungsprüfung in Edge
-  → chrome.scripting im Hauptframe: Klick / Texteingabe / Seiten-Tastenkürzel
+Aktiver Tab und Fokus in Edge
+  → MV3-Service-Worker: Website-Regel → Profilkennung
+  → authentifizierte HTTP-Anfrage auf 127.0.0.1:29381
+  → Controller: Gerätetyp und Profilkatalog prüfen
+  → offizielles Elgato-SDK: vorheriges Profil freigeben, Zielprofil aktivieren
+  → Stream Deck zeigt das vollständige native Layout
 ```
 
-## Module
+Es ist kein Tastendruck als Auslöser nötig. Der physische Steuerknopf dient ausschließlich der Pause; die Property-Inspector-Oberfläche erzeugt Kopplungscodes. Es gibt keine Webseiten-Tasten, DOM-Injektion oder zusätzliche WebSocket-Aktionsverbindung zum Browser. Die WebSocket-Verbindung zum Stream-Deck-Host bleibt Bestandteil des offiziellen SDK.
 
 | Datei | Aufgabe |
 |---|---|
-| `src/shared/workspaces.ts` | Modell, Validierung, Webseitenzuordnung, Freigabe-Origins |
-| `src/extension/workspaces-ui.ts` | Deutsche Webseiten-/Tastenoberfläche |
-| `src/extension/deck-link.ts` | Authentifizierte Tastenverbindung, Binding, Fokusprüfung und Ausführung |
-| `src/extension/page-actions.ts` | Ausführbare DOM-Schritte ohne freie Codeauswertung |
-| `src/plugin/web-channel.ts` | Loopback-WebSocket, Authentifizierung, Layout und begrenzte Anfragen |
-| `src/plugin/index.ts` | SDK-Aktionen „Verbindung / Pause“ und „Webseiten-Taste“ |
-| `src/plugin/inspector.ts` / `plugin/ui/` | Kopplung, Status, Tastennummer |
+| `src/shared/config.ts` | Regelmodell, Validierung, Host-/Pfadzuordnung, neutrale Voreinstellungen |
+| `src/extension/worker.ts` | Browserereignisse, Fokusprüfung, Sequenznummern, lokale HTTP-API |
+| `src/extension/options.ts` | Deutsche Regel-, Geräte- und Kopplungsoberfläche |
+| `src/plugin/controller.ts` | Serialisierte Profilbefehle, Freigabe, Pause und Gerätetypen |
+| `src/plugin/server.ts` | Loopback, Origin-/Tokenprüfung, Kopplung und Lease |
+| `src/plugin/index.ts` | Offizielles SDK, Steueraktion, Einstellungen und Datenmigration |
+| `src/plugin/inspector.ts` | Inspector-Anfragen mit Request-ID und gepufferter früher Antwort |
+| `plugin/ui/pi.js` | SDK-UI-Registrierung, Codeanzeige, Timeout und erneuter Versuch |
+| `src/packager/package.ts` | Bytegleiche Exportkopie, Manifest/Katalog und persönlicher Installer |
+| `src/packager/ui.ts` | Lokale Datei-Auswahl und Download ohne Node-Installation |
 
-Die neue Konfiguration liegt separat unter `chrome.storage.local.workspaces`. Die alten Profilregeln bleiben für die optionale Zusatzfunktion unter `config`. `profileSwitchingEnabled` ist zunächst false; die alte Automatik muss ausdrücklich aktiviert werden. Die technische Plugin-ID und der Datenordner bleiben für das Update von 1.x erhalten. Produktname, Oberfläche, Installationsdateien und Voreinstellungen sind PageDeck.
+## Profile und Erweiterbarkeit
 
-## Protokoll
+Die offizielle SDK-Schnittstelle kann nur Profile aktivieren, die im Pluginmanifest registriert sind. Benutzerprofile lassen sich nicht allgemein aufzählen. Die Browser-Paketvorbereitung nutzt daher den mit der offiziellen Elgato-CLI erzeugten Basisinstaller und ergänzt ausschließlich vom Benutzer gewählte Exportarchive. Diese bleiben undurchsichtig und bytegleich. Der Katalog enthält Kennung, Anzeigename, Gerätetyp, SDK-Profilpfad und SHA-256. Manifestprofile sind bearbeitbar, automatisch importierbar und wechseln bei Installation nicht selbständig das aktive Profil.
 
-`127.0.0.1:29381`: bestehende authentifizierte POST-API für Kopplung/Status/Pause. Zusätzlich `/v1/deck` als WebSocket. Upgrade verlangt exakten Host, Loopback-IP und gepinnte Erweiterungs-Origin. Die erste Nachricht muss innerhalb von vier Sekunden den vorhandenen Token authentifizieren. Der Token steht weder in einer URL noch in Logs. Neue Kopplung schließt die bisherige Tastenverbindung.
+Zusätzliche Layouts benötigen keinen TypeScript-Code: Export, persönliches Paket mit allen Profilen und höherer Revision, Installation, Website-Regel. Neue Aktionsmöglichkeiten kommen über die nativen Stream-Deck-Aktionen und installierte Drittplugins in die Profile. Für neue Zuordnungsfunktionen sind Regelmodell, Validator, Oberfläche und Matcher gemeinsam zu ändern.
 
-Layout: `{type:"layout",context,buttons:[{slot,label}]}`. Tastendruck: `{type:"execute",context,slot,requestId,expires}`. Antwort: `{type:"result",requestId,ok}`. URLs, Selektoren und eingetragene Texte bleiben im Browser. Maximal 16 KiB pro Frame, 32 Tasten, acht offene Anfragen; Anfragefrist fünf Sekunden; vor jedem Browser-Schritt wird die mitgegebene Frist von 4,5 Sekunden geprüft. Nach 60 Sekunden ohne Lebenszeichen wird die Verbindung zurückgesetzt. Heartbeat alle 20 Sekunden; die Erweiterung beantwortet ihn und aktualisiert die Belegung.
+## Zustände und Wiederverbindung
 
-Bei neuer Seite, neuem Tab oder geänderter Konfiguration entsteht eine neue opaque Kontextkennung. Vor Ausführung werden Fokus, Tab, URL und vollständige gewählte Webseitenkonfiguration erneut geprüft. DOM-Schritte prüfen außerdem URL und Dokumentfokus direkt vor jedem Schritt. Bei Fehler endet die Folge ohne Wiederholung; es gibt kein automatisches Wiederholen von Klicks oder Eingaben.
+Regeln liegen unter `chrome.storage.local.config`, Kopplung unter `auth`, die monotone Sequenz unter `sequence`. Der aktuelle Status liegt in Session-Storage. Alte 2.0-Felder werden nicht gelöscht, aber nicht ausgewertet. Die technische Plugin-ID bleibt für Updates stabil; Produktname und neuer Datenordner heißen PageDeck.
 
-## Eine neue Aktionsart ergänzen
+Das Plugin speichert Kopplung und Pause atomar und serialisiert Dateischreibvorgänge. Bei erstmaligem Start im neuen Datenordner kopiert es vorhandene alte Einstellungen, ohne neue Dateien zu überschreiben. Ereignisprotokolle enthalten ausschließlich feste Codes.
 
-Den Typ in `Step`, seine Validierung, die Beschriftung/Editorfelder in `workspaces-ui.ts` und die Ausführung in `page-actions.ts` ergänzen. Die Ausführungsfunktion muss ohne Modulabhängigkeiten serialisierbar bleiben. Danach Modellprüfungen und einen realen DOM-Test hinzufügen. Für Browserfunktionen wie Tabnavigation gehört die Ausführung in `deck-link.ts`. Kein `eval`, keine frei importierten Skripte und keine dynamischen Shellkommandos.
+Neue Browserereignisse ersetzen veraltete Berechnungen. Fokus und URL werden vor dem Versand erneut geprüft. Das Plugin akzeptiert nur eine aktuelle Instanzkennung und aufsteigende Sequenzen; Befehle werden serialisiert. Zwischen zwei unterschiedlichen verwalteten Profilen steht immer eine Freigabe. Wiederkehrende gleichartige Ereignisse senden keine doppelten Profilbefehle. Ein Alarm etwa alle 30 Sekunden dient Wiederverbindung und Lease; nach 90 Sekunden ohne gültiges Ereignis wird die Profilfreigabe angefordert. Aufwachen, Gerätetrennung und späterer Dienststart werden berücksichtigt.
 
-## Echte Stream-Deck-Profile
+## Aussage des Status
 
-Die offizielle SDK-Schnittstelle kann nur im Manifest registrierte Exportprofile aktivieren. Benutzerprofile lassen sich weder auflisten noch direkt aktivieren. Die bisherigen Controller-/Paketvorbereitungsmodule bleiben für diesen getrennten optionalen Weg erhalten. Der neue Webseiten-Modus verwendet sie nicht zum Wechseln Ihres Deck-Profils.
-
-## UI-Routing
-
-Die Property-Inspector-UI registriert sich mit dem vom Host gelieferten UUID. Ausgehende Befehle verwenden diese UI-Kennung entsprechend dem sdpi-Referenzclient; Antworten werden für UI- und Aktionskontext akzeptiert. Der Vergleich mit dem ausgeführten Referenzclient bleibt als Entwicklerprüfung verfügbar. Tasten-Settings werden über die offizielle Settings-API gespeichert; bestehende andere Aktionssettings bleiben erhalten.
+Das SDK bestätigt den Versand, nicht das sichtbare Profil. PageDeck kann weder ein aktuell sichtbares beliebiges Benutzerprofil abfragen noch den tatsächlichen Erfolg fremder Profilaktionen bestätigen. Der Cloudtest prüft die SDK-Befehle an einem simulierten Host. Windows-/Edge-/XL-Verhalten muss separat abgenommen werden.

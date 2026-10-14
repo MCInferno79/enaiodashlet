@@ -38,13 +38,13 @@ const web = http.createServer(async (req, res) => {
 await new Promise(r => web.listen(0, '127.0.0.1', r));
 let stderr = '';
 try {
-  child = spawn(process.execPath, [root + '/bin/plugin.js', '-port', String(host.address().port), '-pluginUUID', info.plugin.uuid, '-registerEvent', 'registerPlugin', '-info', JSON.stringify(info)], { cwd: root, env: { ...process.env, HEKI_TEST_DATA_DIR: temp + '/data' }, stdio: ['ignore', 'ignore', 'pipe'] });
+  child = spawn(process.execPath, [root + '/bin/plugin.js', '-port', String(host.address().port), '-pluginUUID', info.plugin.uuid, '-registerEvent', 'registerPlugin', '-info', JSON.stringify(info)], { cwd: root, env: { ...process.env, PAGEDECK_TEST_DATA_DIR: temp + '/data' }, stdio: ['ignore', 'ignore', 'pipe'] });
   child.stderr.on('data', bytes => { stderr += bytes; });
   await until(() => registered || child.exitCode !== null); assert.equal(child.exitCode, null, stderr);
   const log = () => readFile(temp + '/data/service.log', 'utf8').catch(() => '');
   await until(async () => (await log()).includes('START'));
   sendPlugin({ event: 'willAppear', action, context: contextId, device: 'XL', payload: { controller: 'Keypad', coordinates: { column: 0, row: 0 }, settings: {}, isInMultiAction: false } });
-  browser = await chromium.launchPersistentContext(temp + '/browser', { executablePath: process.env.HEKI_BROWSER_PATH ?? '/usr/bin/chromium', headless: true, viewport: { width: 340, height: 540 }, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  browser = await chromium.launchPersistentContext(temp + '/browser', { executablePath: process.env.PAGEDECK_BROWSER_PATH ?? '/usr/bin/chromium', headless: true, viewport: { width: 340, height: 540 }, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   browser.setDefaultTimeout(8000);
   const page = await browser.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:' + web.address().port);

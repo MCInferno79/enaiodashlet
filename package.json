@@ -1,9 +1,9 @@
 {
   "name": "pagedeck",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
-  "description": "Universelle Webseiten-Aktionen auf frei belegbaren Stream-Deck-Tasten",
+  "description": "Automatischer Webseiten-basierter Profilwechsel für Stream Deck und Microsoft Edge",
   "engines": {
     "node": ">=22"
   },
@@ -19,9 +19,7 @@
     "test:packager": "node tests/packager.e2e.mjs",
     "validate:personalized": "node scripts/check-installer.mjs && streamdeck validate work/installer-check/de.heki.autoprofile.sdPlugin --no-update-check",
     "test:inspector": "node tests/inspector.e2e.mjs",
-    "test:reference": "node scripts/check-ui-reference.mjs",
-    "test:web": "node tests/web-actions.e2e.mjs",
-    "test:workspaces-ui": "node tests/workspaces-ui.e2e.mjs"
+    "test:reference": "node scripts/check-ui-reference.mjs"
   },
   "dependencies": {
     "@elgato/streamdeck": "3.0.2"

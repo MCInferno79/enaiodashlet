@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "paused": false,
+  "unknown": "release",
+  "defaultProfile": "",
+  "deviceIds": [],
+  "rules": [
+    { "id": "meeting", "name": "Meeting", "pattern": "meet.example.org", "profile": "Meeting", "priority": 100, "enabled": true },
+    { "id": "portal", "name": "Portal", "pattern": "portal.example.org", "profile": "Portal", "priority": 100, "enabled": true },
+    { "id": "metrics", "name": "Metrics", "pattern": "metrics.example.org", "profile": "Metrics", "priority": 100, "enabled": true },
+    { "id": "calendar", "name": "Calendar", "pattern": "calendar.example.org", "profile": "Calendar", "priority": 100, "enabled": true }
+  ]
+}

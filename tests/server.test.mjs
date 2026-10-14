@@ -7,7 +7,7 @@ const {Controller}=await moduleFor('plugin/controller');
 const ORIGIN='chrome-extension://'+'a'.repeat(32),OTHER='chrome-extension://'+'b'.repeat(32);
 test('HTTP: Kopplung, Origin, Host, Authentifizierung, Replay und Profilbefehl',async t=>{
   const calls=[];let saved;
-  const profiles=[{key:'BBB',label:'BBB',deviceType:2,name:'profiles/BBB'}];
+  const profiles=[{key:'Meeting',label:'Meeting',deviceType:2,name:'profiles/Meeting'}];
   const devices=()=>[{id:'XL',name:'XL',type:2,size:{columns:8,rows:4},isConnected:true}];
   const c=new Controller(profiles,devices,async(_,p)=>calls.push(p));
   const bridge=createBridge({controller:c,profiles,devices,saveCredentials:async c=>{saved=c;},savePaused:async()=>{}});
@@ -23,10 +23,10 @@ test('HTTP: Kopplung, Origin, Host, Authentifizierung, Replay und Profilbefehl',
   assert.equal((await post('/v1/status',{},'wrong')).status,401);
   assert.equal((await post('/v1/status',{},token,OTHER)).status,403);
   const status=await (await post('/v1/status',{},token)).json();
-  const event={instance:status.instance,sequence:1,focused:true,target:'BBB',keep:false,paused:false,deviceIds:[]};
+  const event={instance:status.instance,sequence:1,focused:true,target:'Meeting',keep:false,paused:false,deviceIds:[]};
   assert.equal((await post('/v1/event',{...event,url:'https://secret'},token)).status,400);
   assert.equal((await post('/v1/event',{...event,instance:'old'},token)).status,409);
-  assert.equal((await post('/v1/event',event,token)).status,200);assert.deepEqual(calls,['profiles/BBB']);
+  assert.equal((await post('/v1/event',event,token)).status,200);assert.deepEqual(calls,['profiles/Meeting']);
   assert.equal((await post('/v1/event',event,token)).status,409);
   assert.equal((await post('/v1/event',{...event,sequence:2,focused:false},token)).status,200);assert.equal(calls.at(-1),undefined);
   const preflight=await fetch('http://127.0.0.1:29381/v1/event',{method:'OPTIONS',headers:{Origin:ORIGIN}});assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),ORIGIN);

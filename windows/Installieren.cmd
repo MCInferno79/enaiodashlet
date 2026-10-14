@@ -1,4 +1,5 @@
 @echo off
 setlocal
-echo PageDeck wird ueber den offiziellen Stream-Deck-Installer installiert.
-start "" "%~dp0PageDeck-2.0.0.streamDeckPlugin"
+echo Zuerst eigene Profile mit Profile-Paket-erstellen.html einbinden.
+echo Das erzeugte persoenliche Paket per Doppelklick installieren.
+start "" "%~dp0Profile-Paket-erstellen.html"

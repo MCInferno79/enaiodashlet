@@ -1,42 +1,39 @@
 # PageDeck bedienen und erweitern
 
-PageDeck arbeitet innerhalb Ihres selbst gestalteten Stream-Deck-Profils. „Webseiten-Taste“ besitzt eine Nummer von 1–32. In Edge definieren Sie für jede Webseite die Beschriftung und Funktion dieser Nummer. Andere Stream-Deck-Aktionen bleiben frei belegbar.
+## Automatischer Wechsel
 
-## Webseite hinzufügen
+Der aktive Tab im fokussierten Edge-Fenster bestimmt das vollständige Stream-Deck-Profil. Tabwechsel, Navigation, Fensterfokus und History-API-Navigation in Webanwendungen lösen eine Auswertung aus. Hintergrundtabs überschreiben das Profil nicht. Ein Tastendruck zum Wechseln ist nicht erforderlich.
 
-„+ Webseite“ wählen, Anzeigename und Domain eintragen, bei Bedarf Priorität setzen. Beispiele:
+In den Edge-Einstellungen legen Sie Website-Regeln an. Das Ziel ist immer eine Profilkennung aus dem installierten persönlichen Paket. Exakte Hosts sind unabhängig von Großschreibung; `*.example.org` erfasst Subdomains, jedoch nicht `example.org`. Ein Pfad wie `portal.example.org/dashboard` gilt für diesen Pfad und Unterpfade, nicht für `/dashboard-alt`. URL-Parameter und Fragmente dienen nicht zur Zuordnung. Bei mehreren Treffern gewinnt die höchste Priorität, bei Gleichstand die obere Regel.
 
-| Muster | Bedeutung |
+## Unbekannte Seiten und Fokus
+
+| Einstellung | Verhalten im aktiven Edge-Fenster |
 |---|---|
-| `portal.example.org` | Exakter Host |
-| `*.example.org` | Subdomains, nicht `example.org` selbst |
-| `portal.example.org/aufgaben` | Pfad und Unterpfade; nicht `/aufgaben-alt` |
+| Profil freigeben | Den verwalteten Profilwechsel beenden |
+| Benanntes Plugin-Standardprofil | Das gewählte eingebundene Profil aktivieren |
+| Aktuelles verwaltetes Profil beibehalten | Das zuletzt von PageDeck aktivierte Profil behalten |
 
-„+ Taste“ fügt eine freie Nummer hinzu. Wählen Sie dieselbe Nummer wie im Einstellungsbereich der Deck-Taste. Beschriftung und 1–10 Schritte bearbeiten, die Webseite freigeben und speichern. Neue Webseiten und Änderungen benötigen kein neues Pluginpaket. Pro Webseite sind höchstens 32 Tasten möglich. Größere Priorität gewinnt; Gleichstände entscheiden sich nach Reihenfolge in der Konfiguration.
+Beim Verlassen von Edge fordert PageDeck immer die Freigabe an. Vor dem Wechsel von einem verwalteten Profil zum nächsten wird das alte freigegeben, damit keine verschachtelte Profilhistorie entsteht. Die folgende Profilwahl und Smart Profiles anderer Anwendungen verwaltet Stream Deck selbst. Eine bestimmte Rückkehr etwa zu einem Outlook-Profil kann die SDK-Schnittstelle nicht garantieren.
 
-## Aktionsschritte
+„Alle passenden Geräte“ berücksichtigt Geräte mit einem eingebundenen Profil für ihren SDK-Gerätetyp. Einzelne Geräte lassen sich mit Strg auswählen. Ein XL benötigt Profile vom Typ 2; ein Export für ein anderes Modell wird nicht automatisch umgebaut.
 
-- **Element klicken:** CSS-Selektor wie `#speichern`. Das Element muss vorhanden, sichtbar und aktiv sein.
-- **Feld ausfüllen:** CSS-Selektor und Text; ersetzt den Inhalt eines normalen Eingabefelds oder Textbereichs. DOM-Eingabe-/Änderungsereignisse werden ausgelöst. Passwort-, Datei- und versteckte Felder werden nicht befüllt.
-- **Text einfügen:** Einfügen an der Auswahlposition. Ohne Selektor wird das fokussierte Standard-Eingabefeld verwendet.
-- **Seiten-Tastenkürzel:** zum Beispiel `Control+Shift+k`, `Enter`, `ArrowDown`. Dies sind synthetische Tastaturereignisse innerhalb der Webseite. Die Reaktion hängt von der Webanwendung ab. Windows-/Browser-Hotkeys als normale Stream-Deck-Aktionen daneben einrichten.
-- **Scrollen:** Pixelzahl, negativ für nach oben.
-- **Seite öffnen:** vollständige HTTP(S)-Adresse ohne Zugangsdaten; letzter Schritt. Öffnet im bisherigen Tab.
+## Pause und Bearbeitung
 
-Schritte laufen der Reihe nach. Wenn ein Element fehlt oder ein Schritt fehlschlägt, endet die Folge; bereits ausgeführte Schritte werden nicht rückgängig gemacht. Verzögerungs-/Warteschritte, beliebiges JavaScript, fremde Frames und ein visueller Elementwähler gehören noch nicht zu dieser Version. Nach Navigation oder geänderter Konfiguration wird eine veraltete Anfrage verworfen.
+Die Schaltfläche in Edge pausiert die Browserautomatik. Ein Druck auf die physische Aktion „Automatik / Kopplung“ pausiert die Pluginseite zusätzlich. Beide Pausen werden getrennt gespeichert. Die Edge-Oberfläche kann eine Pluginpause aufheben. Während einer Pause wird die Profilfreigabe angefordert. Vor der Bearbeitung von Layouts pausieren, damit Navigation im Browser das bearbeitete Profil nicht wechselt.
 
-## Fokus, Rückmeldung und Pause
+## Eigene Layouts ergänzen
 
-Nur der aktive Tab des fokussierten Edge-Fensters darf Aktionen erhalten. Bei unbekannter Webseite, Pause oder Fokusverlust werden die Webseiten-Tasten neutral beschriftet. Ein fehlgeschlagener Tastendruck zeigt am Deck ein Warnsymbol; die Edge-Einstellungen nennen den zuletzt bekannten Fehler. Ein grünes Häkchen bedeutet, dass die konfigurierten Schritte ausgeführt bzw. die Ereignisse übergeben wurden; es bestätigt nicht den Geschäftsvorgang auf einem Webserver.
+1. Das vollständige Profil in Stream Deck erstellen oder bearbeiten. Für Webseiteninteraktionen Ihre üblichen Hotkeys, Texte, Makros und vorhandenen Plugins verwenden. PageDeck wählt das Layout; die darin enthaltenen Aktionen führen die Eingaben aus.
+2. Das aktuelle Profil als `.streamDeckProfile` exportieren. Nachträgliche Änderungen an einer importierten Profilkopie vor dem nächsten Paketbau erneut exportieren.
+3. In `Profile-Paket-erstellen.html` alle weiterhin benötigten Exporte auswählen. Bestehende Kennungen beibehalten, neue Kennungen ergänzen und eine höhere Revision wählen.
+4. Das neue persönliche Plugin herunterladen und per Doppelklick installieren. Stream Deck danach vollständig neu starten; in Edge „Verbindung testen“ wählen.
+5. Neue Domainregeln dem neuen Profil zuordnen und speichern.
 
-Die Aktion „Verbindung / Pause“ pausiert das gesamte Plugin. Die Edge-Oberfläche besitzt zusätzlich eine lokale Pause. „Pause am Deck aufheben“ hebt die Plugin-Pause auf. Bei Verbindungsabbruch werden Tastenbelegungen entfernt; erneute Browserereignisse oder der Verfügbarkeitsalarm verbinden neu. Ein WebSocket-Heartbeat hält die laufende Tastenverbindung aktiv.
+Änderungen an Domain, Pfad, Priorität und Gerätezuordnung für bereits eingebundene Profile brauchen kein neues Pluginpaket. Die exportierten Profile bleiben bearbeitbar. Eine erneute Installation kann neue Profilkopien anlegen; deshalb Exporte und Sicherungen aufbewahren.
 
-## Sichern und aktualisieren
+## Sicherung und Entfernen
 
-„Webseiten exportieren“ sichert Webseiten, Tasten und Schrittfolgen als JSON. Der Export enthält eingetragene Texte, aber keinen Kopplungsschlüssel. Nach Import prüfen und speichern; Website-Freigaben bei Bedarf erneut erteilen. Ihr normales Stream-Deck-Profil sichern Sie weiterhin über Stream Deck.
+„Konfiguration exportieren“ sichert die Regeln und Geräteauswahl als JSON, ohne Kopplungstoken. Ein Import ersetzt die in der Oberfläche geladenen Regeln erst beim Speichern. Exportdateien können eigene Domains enthalten; persönliche Profilarchive enthalten möglicherweise Daten anderer Plugins.
 
-Für ein Programmupdate das neue `.streamDeckPlugin` installieren und die Erweiterungsdateien am bisherigen Ort aktualisieren. Keine Profilpakete für Webseiten-Aktionen bauen. Regeln und Tasten werden in Edge gespeichert. Bei einer neuen Erweiterungs-ID erneut koppeln und Konfiguration importieren. Vor größeren Änderungen die Automatik pausieren.
-
-## Deinstallation
-
-PageDeck in Stream Deck über die Pluginverwaltung entfernen und die Edge-Erweiterung entfernen. Nicht benötigte PageDeck-Tasten können im eigenen Profil gelöscht werden. Andere Aktionen und Benutzerprofile bleiben bestehen. Der bisherige lokale Datenordner `%APPDATA%\HeKI-AutoProfile` enthält aus Kompatibilitätsgründen weiterhin Kopplung, Pause und Ereigniscodes. Bei vollständiger Entfernung nach Beenden von Stream Deck bei Bedarf löschen. Es gibt keinen zusätzlichen Dienst, Autostarttask oder separat installierten Node-Prozess zu entfernen.
+Zur Entfernung PageDeck über die Pluginverwaltung von Stream Deck und die Erweiterung in Edge entfernen. Persönliche Profilkopien bei Bedarf über Stream Deck löschen. Nach Beenden von Stream Deck kann `%APPDATA%\PageDeck` mit Kopplung, Pause und Ereigniscodes gelöscht werden. Bei einem Update kopierte alte Einstellungen liegen noch im bisherigen Datenordner. Es gibt keinen zusätzlich installierten Systemdienst oder Autostarttask.

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "paused": false,
+  "unknown": "release",
+  "defaultProfile": "",
+  "deviceIds": [],
+  "rules": [
+    { "id": "meine-website", "name": "Meine Website", "pattern": "portal.example.org", "profile": "Website", "priority": 0, "enabled": false }
+  ]
+}

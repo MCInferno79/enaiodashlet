@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 const script = await readFile('plugin/ui/pi.js', 'utf8');
 function harness() {
-  const nodes = Object.fromEntries(['pair','code','state','diagnostic','status','slot','slot-section'].map(id => [id, { disabled: id === 'pair', value: '', textContent: '', select() {}, append() {}, hidden: true }]));
+  const nodes = Object.fromEntries(['pair','code','state','diagnostic','status'].map(id => [id, { disabled: id === 'pair', value: '', textContent: '', select() {} }]));
   let clock = 1000000, serial = 0; const timers = new Map(), connections = [];
   class FakeDate extends Date { static now() { return clock; } }
   class WebSocket {
@@ -16,10 +16,10 @@ function harness() {
     reply(payload, context = 'action-context') { this.onmessage({ data: JSON.stringify({ event: 'sendToPropertyInspector', context, action: 'de.heki.autoprofile.control', payload }) }); }
   }
   const window = {};
-  vm.runInNewContext(script, { window, document: { querySelector: selector => nodes[selector.slice(1)], createElement: () => ({}) }, WebSocket, Date: FakeDate, setTimeout: (fn, delay) => { const id = ++serial; timers.set(id, { fn, at: clock + delay }); return id; }, clearTimeout: id => timers.delete(id) });
-  const connect = (action = 'de.heki.autoprofile.control') => window.connectElgatoStreamDeckSocket('12345', 'inspector-uuid', 'registerPropertyInspector', JSON.stringify({ application: { version: '7.3' } }), JSON.stringify({ action, context: 'action-context', payload: {settings:{slot:3,preserved:'keep'}} }));
+  vm.runInNewContext(script, { window, document: { querySelector: selector => nodes[selector.slice(1)] }, WebSocket, Date: FakeDate, setTimeout: (fn, delay) => { const id = ++serial; timers.set(id, { fn, at: clock + delay }); return id; }, clearTimeout: id => timers.delete(id) });
+  const connect = () => window.connectElgatoStreamDeckSocket('12345', 'inspector-uuid', 'registerPropertyInspector', JSON.stringify({ application: { version: '7.3' } }), JSON.stringify({ action: 'de.heki.autoprofile.control', context: 'action-context' }));
   function advance(ms) { const end = clock + ms; let guard = 0; while (++guard < 100) { const next = [...timers].filter(([,t]) => t.at <= end).sort((a,b) => a[1].at-b[1].at)[0]; if (!next) break; clock = next[1].at; timers.delete(next[0]); next[1].fn(); } assert(guard < 100); clock = end; }
-  function ready() { connect(); const socket = connections.at(-1); socket.open(); socket.reply({ requestId: socket.sent.at(-1).payload.requestId, localServerReady: true, pluginVersion: '1.0.3.0', devices: [], profiles: [] }); return socket; }
+  function ready() { connect(); const socket = connections.at(-1); socket.open(); socket.reply({ requestId: socket.sent.at(-1).payload.requestId, localServerReady: true, pluginVersion: '2.1.0.0', devices: [], profiles: [] }); return socket; }
   return { nodes, connections, connect, ready, advance, now: () => clock };
 }
 test('Inspector verwendet die registrierte UI-UUID für Befehle und zeigt den Code an', () => {
@@ -68,13 +68,4 @@ test('Timeout verändert keine vom Plugin bestätigte Dienstbereitschaft', () =>
   const h = harness(); h.ready(); h.nodes.pair.onclick(); h.advance(5000);
   assert.match(h.nodes.diagnostic.textContent, /Lokaler Dienst: bereit/);
   assert.equal(h.nodes.pair.disabled, false);
-});
-
-test('Webseiten-Taste liest und speichert Nummer über die SDK-Settings-API', () => {
-  const h=harness();h.connect('de.heki.autoprofile.web');const s=h.connections[0];s.open();
-  assert.equal(h.nodes['slot-section'].hidden,false);assert.equal(h.nodes.slot.value,'3');
-  assert.equal(s.sent.at(-1).event,'getSettings');
-  s.onmessage({data:JSON.stringify({event:'didReceiveSettings',context:'inspector-uuid',action:'de.heki.autoprofile.web',payload:{settings:{slot:5,preserved:'keep'}}})});
-  assert.equal(h.nodes.slot.value,'5');h.nodes.slot.value='7';h.nodes.slot.onchange();
-  assert.deepEqual(s.sent.at(-1),{event:'setSettings',action:'de.heki.autoprofile.web',context:'inspector-uuid',payload:{slot:7,preserved:'keep'}});
 });

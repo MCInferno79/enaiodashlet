@@ -1,15 +1,14 @@
 {
   "manifest_version": 3,
   "name": "PageDeck",
-  "version": "2.0.0",
-  "description": "Verbindet frei belegbare Stream-Deck-Tasten mit Aktionen auf Ihren Webseiten.",
+  "version": "2.1.0",
+  "description": "Schaltet lokale Stream-Deck-Plugin-Profile anhand des aktiven Edge-Tabs um.",
   "minimum_chrome_version": "120",
   "permissions": [
     "tabs",
     "storage",
     "alarms",
-    "webNavigation",
-    "scripting"
+    "webNavigation"
   ],
   "host_permissions": [
     "http://127.0.0.1/*"
@@ -22,16 +21,12 @@
     "default_title": "PageDeck – Einstellungen und Status",
     "default_icon": "icon.png"
   },
-  "options_page": "workspaces.html",
+  "options_page": "options.html",
   "incognito": "not_allowed",
   "icons": {
     "128": "icon.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:29381 ws://127.0.0.1:29381"
-  },
-  "optional_host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ]
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src http://127.0.0.1:29381"
+  }
 }
