@@ -4,7 +4,7 @@
 |---|---|
 | „Lokaler Dienst nicht erreichbar“ | Stream Deck starten. Eigenes Einrichtungsprofil mit Steueraktion anzeigen. In Edge Verbindung testen. Bis etwa 30 Sekunden ohne Browserereignis abwarten. |
 | Kein Plugin in der Aktionsliste | Installationspfad und manifest.json prüfen, Stream Deck vollständig neu starten; Mindestversion 7.1 und vorhandene Node.js-24-Laufzeit prüfen. Unternehmensfreigaben beachten. |
-| „Profil fehlt“ trotz vorhandenem Benutzerprofil BBB | Der Benutzerprofilname genügt nicht. Eine neue XL-Kopie exportieren, mit Kennung BBB / Typ 2 in das Paket einbinden und eigenes Plugin aktualisieren. |
+| „Profil fehlt“ trotz vorhandenem Benutzerprofil BBB | Der Benutzerprofilname genügt nicht. Eine neue XL-Kopie exportieren, in Profile-Paket-erstellen.html mit Kennung BBB / Typ 2 einbinden und die erzeugte .streamDeckPlugin-Datei installieren. |
 | Nach Installation noch kein Umschalten | Katalog muss Exportprofile enthalten. Importdialog im Host bestätigen, Erweiterung koppeln, Pause prüfen, gewünschten Tab in den Vordergrund bringen. |
 | „Kopplung fehlt oder wurde erneuert“ | Neuer Code im Inspector, danach in Edge koppeln. Prüfen, ob ein zweites Browserprofil den ersten Token ersetzt hat oder der Erweiterungspfad verändert wurde. |
 | Kopplungscode abgelaufen | Neuen Code erzeugen; zwei Minuten Gültigkeit. Nach fünf Fehlversuchen eine Minute warten. |
@@ -19,6 +19,15 @@
 | Erweiterung kann nicht geladen werden | `edge://policy` bzw. IT-Freigaben prüfen. Entwicklermodus allein überstimmt keine Administrationsrichtlinie. Richtlinien nicht umgehen. |
 | Lokaler Netzwerkzugriff blockiert | Browsermeldung und Edge-Richtlinien zur lokalen Kommunikation prüfen; für diese Erweiterung entsprechend IT-Vorgaben freigeben. Keine globalen Sicherheitsfunktionen abschalten. |
 | Grafana-Aktion funktioniert nicht | Ursprüngliches Grafana-Plugin installiert lassen. Dessen Anmeldung/globalen Settings unabhängig vom Profilexport prüfen. HeKI verändert sie nicht. |
+
+## Profilvorbereitung und Installation
+
+- Keine separate Node-Installation nötig: `Profile-Paket-erstellen.html` in Edge öffnen oder die Seite über den Link in den Erweiterungseinstellungen aufrufen. Die CMD-Datei `Profile-einbinden.cmd` öffnet jetzt lediglich diese Seite.
+- Lokale HTML-Datei wird durch die Administration blockiert: Erweiterungsseite verwenden; keine Sicherheitsrichtlinien umgehen.
+- Doppelklick öffnet das Paket nicht: die Dateizuordnung für `.streamDeckPlugin` muss auf Stream Deck zeigen. Keine Umbenennung zu `.streamDeckProfile`; das sind unterschiedliche Dateitypen.
+- Ein Update wird nicht angeboten/akzeptiert: höhere Paketrevision als beim zuletzt installierten persönlichen Paket wählen. Basisinstaller ohne Profile nicht als Ersatz für das persönliche Paket installieren.
+- „Basispaket überschreitet die sichere Entpackgröße“: vollständiges aktuelles Release-ZIP verwenden. Dies schützt insbesondere vor falsch ausgewerteten ZIP64-Größen; keine Limits abschalten.
+- Die Seite liest nur ausgewählte Exporte; sie prüft keine undokumentierten internen Aktionsschemas. Ein formal vorhandenes Archiv kann daher erst beim tatsächlichen Import in Stream Deck endgültig geprüft werden.
 
 ## Lokale Logs
 
@@ -37,6 +46,8 @@ npm run check
 npm run build
 npm test
 npm run validate
+npm run validate:personalized
+npm run test:packager
 ```
 
 Für einen UI-Test ist ein verfügbarer Chromium-Testbrowser erforderlich. Beispiel:
@@ -48,3 +59,5 @@ npm run test:browser
 ```
 
 `test:ui` prüft die Optionsseite mit simulierten Browser-APIs. `test:browser` benötigt die Erlaubnis, eine tatsächliche entpackte Erweiterung im Testbrowser zu laden. In der gelieferten Cloud-Umgebung ist genau dies administrativ gesperrt; deshalb wird dieser Test dort nicht als bestanden ausgewiesen. Tests nutzen ausschließlich fiktive Navigationen und einen simulierten Stream-Deck-Host.
+
+Die Entwicklungsbefehle gelten nur für den Buildrechner. Auf dem Dienstrechner werden keine npm-Kommandos ausgeführt. Der Test der Profilvorbereitung nutzt einen statischen Testserver; die Produktseite benötigt diesen nicht. Ein direkter file://-Test wurde hier durch die Browseradministration blockiert.

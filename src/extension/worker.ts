@@ -44,7 +44,7 @@ async function evaluate() {
     const paused = config.paused || result.paused;
     const selected = result.devices.filter(d => d.isConnected && (!config.deviceIds.length || config.deviceIds.includes(d.id)));
     const requested = result.results.some(r => r.state === "command-sent");
-    let message = paused ? "Automatik pausiert – Profilfreigabe angefordert." : !active.focused ? "Edge im Hintergrund – Profilfreigabe angefordert." : selected.length === 0 ? "Kein ausgewähltes Stream Deck verbunden." : failed ? "Stream-Deck-Befehl fehlgeschlagen." : missing ? "Profil für dieses Gerät fehlt. Exportdatei über den CMD-Assistenten einbinden." : requested ? `Microsoft Edge erkannt – ${match.host || "interne Seite"} – Profilbefehl ${target ?? "beibehalten"} gesendet.` : "Keine passende Regel – Profilfreigabe angefordert.";
+    let message = paused ? "Automatik pausiert – Profilfreigabe angefordert." : !active.focused ? "Edge im Hintergrund – Profilfreigabe angefordert." : selected.length === 0 ? "Kein ausgewähltes Stream Deck verbunden." : failed ? "Stream-Deck-Befehl fehlgeschlagen." : missing ? "Profil für dieses Gerät fehlt. Exportdatei mit Profile-Paket-erstellen.html lokal einbinden und das erzeugte Plugin installieren." : requested ? `Microsoft Edge erkannt – ${match.host || "interne Seite"} – Profilbefehl ${target ?? "beibehalten"} gesendet.` : "Keine passende Regel – Profilfreigabe angefordert.";
     await saveStatus({ connected: true, host: match.host, profile: target, message, server: result });
     await chrome.action.setBadgeText({ text: paused ? "Ⅱ" : missing || failed ? "!" : "" });
     await chrome.action.setBadgeBackgroundColor({ color: missing || failed ? "#b45309" : "#0f766e" });

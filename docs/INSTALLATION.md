@@ -1,59 +1,66 @@
-# Installation und BBB-Prototyp
+# Installation ohne separate Node.js-Installation
 
 ## Voraussetzungen
 
-- Windows 10/11, Microsoft Edge ab Chromium-Version 120, Stream Deck Software ab 7.1. Vorzugsweise die von der IT freigegebene aktuelle Version verwenden.
-- Stream Deck XL, SDK-Typ `2`, 8 Spalten × 4 Zeilen. Andere Typen sind möglich, benötigen aber eigene Exportprofile für ihren Gerätetyp. Keine Beschränkung auf 15 Tasten.
-- Stream Deck muss die Node.js-24-Laufzeit bereits bereitstellen. Ab 7.1 kann Elgato Laufzeiten nachladen. Die IT muss dies vor dem Offline-Einsatz vorbereiten; das HeKI-Paket lädt selbst nichts nach.
-- Benutzer darf eine entpackte Edge-Erweiterung laden und einen eigenen Stream-Deck-Pluginordner installieren. Lokaler Port `29381` muss frei sein. Kein eingehender Firewall-Port erforderlich.
-- Node.js ab 22 auf dem Vorbereitungsrechner für den CMD-Profilassistenten; für den späteren Betrieb ist keine zusätzliche systemweite Node-Installation nötig.
-- Bestehende HeKI-/Grafana-Plugins bleiben installiert. Ihre Einstellungen, Lizenzen und Anmeldungen müssen weiter verfügbar sein.
+- Windows 10/11, Microsoft Edge ab Chromium-Version 120, Stream Deck ab 7.1. Die von der IT freigegebene aktuelle Version verwenden.
+- Stream Deck XL, SDK-Typ `2`, 8 Spalten × 4 Zeilen. Andere Typen benötigen passende eigene Exportprofile. Keine Beschränkung auf 15 Tasten.
+- Stream Deck stellt seine **eigene Node.js-24-Plugin-Laufzeit** bereit. Eine systemweite Node.js-Installation ist nicht erforderlich. Ab 7.1 kann Stream Deck seine Laufzeiten nachladen; vor einem Offline-Einsatz muss die Laufzeit vorhanden sein. Eine IT-Sperre wird nicht umgangen.
+- Benutzer darf eine entpackte Edge-Erweiterung und lokale `.streamDeckPlugin`-Pakete installieren. Port `29381` muss frei sein. Kein eingehender Netzwerk-Firewallport nötig.
+- Keine Installation von Node.js, npm, Python, PowerShell-Modulen oder zusätzlichem Windows-Dienst erforderlich. Der Build ist bereits erledigt.
+- Bestehende HeKI-/Grafana-Plugins bleiben installiert und behalten ihre Einstellungen, Lizenzen und Anmeldungen.
 
-Das ZIP vollständig in einen stabilen lokalen Ordner entpacken, beispielsweise `%LOCALAPPDATA%\HeKI-AutoProfile-Paket`. Nicht aus der ZIP-Vorschau und nicht von einer Netzwerkfreigabe starten. Beim Verschieben der entpackten Erweiterung kann sich ihre ID ändern; dann ist neu zu koppeln.
+ZIP vollständig in einen stabilen lokalen Ordner entpacken, zum Beispiel `%LOCALAPPDATA%\HeKI-AutoProfile-Paket`. Nicht aus der ZIP-Vorschau starten. Beim Verschieben der Erweiterung kann sich deren ID ändern; dann neu koppeln.
 
-## 1. Sicherung und echte Profile vorbereiten
+## 1. Originale sichern und Profilkopien exportieren
 
-1. In Stream Deck die vorhandenen Profile über Einstellungen → Profile exportieren. Zusätzlich eine vollständige Stream-Deck-Sicherung über die dafür angebotene Oberfläche erstellen.
-2. Das bestehende BBB-XL-Profil **in der Oberfläche duplizieren** und die Kopie beispielsweise `HeKI Auto BBB XL` nennen. Falls Ihre Version keine direkte Duplizierung anbietet, ein neues Testprofil anlegen und gewünschte Aktionen per Oberfläche kopieren. Das Original nicht überschreiben.
-3. Nur diese Kopie exportieren, zum Beispiel nach `Dokumente\HeKI-Exporte\BBB-XL.streamDeckProfile`. Die Kopie hat eine eigene Profilidentität; ein Import soll keine vorhandenen Originale ersetzen. Erscheint ein Ersetzen-Dialog für ein Originalprofil, abbrechen.
-4. Zum ersten BBB-Test genügt ein neues XL-Profil mit einer gut sichtbaren HeKI-Statusaktion. Das Profil über Stream Deck exportieren; es ist ein echtes Testprofil, kein vom Projekt erfundenes Archiv.
-5. Für HeKI, Grafana, Speakr und optional ein Standardprofil entsprechend verfahren. Drittplugin-Aktionen und deren Aktionssettings bleiben in der Exportdatei enthalten. Globale Settings eines Drittplugins gehören nicht zwangsläufig zum Profilexport und werden von HeKI nicht kopiert oder verändert.
-6. Stream Deck über das Symbol im Windows-Infobereich vollständig beenden. Nur das Fenster zu schließen reicht häufig nicht.
-7. `Profile-einbinden.cmd` doppelklicken. Den vollständigen Dateipfad einfügen. Für BBB Kennung `BBB`, Anzeigename frei, SDK-Typ `2` verwenden. Für die anderen initialen Zuordnungen sind die Kennungen `HeKI`, `Grafana`, `Speakr` vorgesehen. Für einen Fallback kann `Standard` verwendet werden.
-8. Der Assistent kopiert jedes Exportarchiv bytegleich und gibt seinen SHA-256-Hash aus. Er bearbeitet ausschließlich das entpackte Vorbereitungspaket, keine Stream-Deck-Profildatenbank. Leere Pfadeingabe beendet den Assistenten.
+1. Vorhandene Profile und eine vollständige Stream-Deck-Sicherung über die Oberfläche exportieren.
+2. Das BBB-Profil in der Oberfläche **duplizieren**, Kopie etwa `HeKI Auto BBB XL` nennen. Falls keine Duplizierung angeboten wird, ein neues XL-Testprofil anlegen und Aktionen über die Oberfläche kopieren. Das Original bleibt unverändert.
+3. Nur diese Kopie als `.streamDeckProfile` exportieren. Für den ersten Test genügt ein neues echtes XL-Profil mit gut sichtbarer Testaktion.
+4. Optional HeKI, Grafana, Speakr und Standardprofil ebenso vorbereiten. Drittplugin-Aktionen und Aktionssettings bleiben im Export enthalten. Globale Drittplugin-Einstellungen sind nicht zwangsläufig Teil des Exports; HeKI ändert sie nicht.
 
-Profilschlüssel sind technische IDs aus Buchstaben, Zahlen, `_` und `-`. Der Anzeigename kann etwa `HeKI / Grafana` lauten. Für ein weiteres Gerät dieselbe Kennung mit dem passenden anderen Gerätetyp einbinden. Der Gerätetyp wird im Assistenten vom Administrator angegeben und zur Laufzeit mit dem SDK-Gerät verglichen; das undokumentierte Archivinnere wird nicht zur Typerkennung ausgewertet. Deshalb nur passende XL-Exporte als Typ 2 deklarieren.
+Keine künstlich generierten Profile verwenden. Exportarchive werden als unveränderte Dateien behandelt; die interne Aktionsstruktur wird nicht interpretiert.
 
-## 2. Stream-Deck-Plugin installieren
+## 2. Persönliches Installationspaket in Edge erstellen
 
-1. `Installieren.cmd` ausführen. Es kopiert nur den eigenen Ordner nach `%APPDATA%\Elgato\StreamDeck\Plugins\de.heki.autoprofile.sdPlugin` und richtet den Zugriffsschutz für `%APPDATA%\HeKI-AutoProfile` ein.
-2. Stream Deck starten. Falls Stream Deck die mitgelieferten Profile importieren möchte, den Import der zuvor erstellten Kopien zulassen. Keine Ersetzung eines Originalprofils bestätigen. `DontAutoSwitchWhenInstalled: true` verhindert einen gewünschten automatischen Sprung allein durch die Installation; die tatsächlichen Importdialoge können je nach Hostversion variieren.
-3. In Stream Deck ein **neues** Einrichtungsprofil `HeKI Einrichtung XL` erstellen. Aus der Kategorie „HeKI Auto Profile“ die Aktion „Automatik / Kopplung“ auf eine Taste ziehen. Vorhandene Profile müssen dafür nicht verändert werden.
-4. Die Aktion auswählen. Im Einstellungsbereich „Neuen Kopplungscode erzeugen“ betätigen. Den vollständigen Code kopieren. Er verfällt nach zwei Minuten.
+**Variante A – lokale Seite:** `Profile-Paket-erstellen.html` aus dem ZIP in Edge öffnen. Alle zugehörigen Dateien im Ordner belassen; Skripte und Kompressionsbibliothek liegen lokal bei. Die Seite benötigt keinen Server und stellt keine Netzwerkverbindungen her.
 
-Der Hintergrundserver startet im Plugin-Einstiegspunkt, unabhängig von `willAppear`. Für die Abnahme den Start auch ohne sichtbare HeKI-Aktion prüfen. Die Dokumentation des Hosts garantiert keinen universellen Autostartvertrag für jede Installation ohne genutzte Aktion. Ein eigenes Start-/Einrichtungsprofil mit sichtbarer Aktion ist die konservative Alternative. Das Plugin benötigt die Aktion während der laufenden Sitzung nicht auf jedem Zielprofil. Ein bekannter Host, der das Plugin nach dem Verschwinden aller Aktionen beendet, muss in der Hardwareabnahme erkannt werden; dann die Aktion in **neue Profilkopien** aufnehmen.
+**Variante B – Erweiterungsseite:** Falls lokale HTML-Dateien gesperrt sind, zuerst die Edge-Erweiterung wie in Schritt 4 laden. In ihren Einstellungen „Eigene Exportprofile ohne Node.js in ein Installationspaket einbinden“ öffnen. Dieselbe Seite läuft dann innerhalb der Erweiterung. Keine Browserrichtlinien abschalten.
 
-`Plugin-starten.cmd` sendet einen offiziellen passiven Deep-Link ohne Steuerdaten. Das kann zur Diagnose bzw. Aktivierung dienen; ein garantierter Autostart durch diesen Link wird nicht behauptet. Keinen zusätzlichen Windows-Dienst installieren.
+1. In der Zeile BBB die exportierte `.streamDeckProfile`-Datei auswählen.
+2. Kennung `BBB` und Gerätetyp `Stream Deck XL · 32 Tasten` beibehalten. Anzeigename frei wählbar.
+3. Weitere Exporte bei Bedarf unter `HeKI`, `Grafana`, `Speakr`, `Standard` auswählen; andere Zeilen leer lassen. Zusätzliche Kennungen über „Weiteres Profil“ ergänzen. Der Administrator wählt den zum Export passenden Gerätetyp; im Betrieb prüft das SDK den tatsächlichen Typ. Keine Typerkennung über das undokumentierte Archivinnere.
+4. Beim ersten Paket Revision `1` verwenden. Für Änderungen eine höhere Revision als beim zuletzt installierten Paket wählen. Die Seite merkt sich nur diese Zahl, niemals Profilinhalte.
+5. „Installationspaket erstellen“, dann „Paket herunterladen“. Ergebnis zum Beispiel: `HeKI-AutoProfile-1.0.1.1.streamDeckPlugin`.
 
-## 3. Edge-Erweiterung installieren und koppeln
+Höchstens 32 Exporte, bis 50 MiB je Datei und 100 MiB insgesamt. Dateien bleiben lokal und werden bytegleich kopiert. Das persönliche Paket kann vertrauliche Settings enthalten: nicht öffentlich auf GitHub oder in Tickets hochladen.
 
-1. Edge öffnen und `edge://extensions` aufrufen.
-2. „Entwicklermodus“ aktivieren.
-3. „Entpackte Erweiterung laden“ wählen und den Ordner `edge-extension` aus dem Paket auswählen.
-4. Über das Erweiterungsmenü HeKI öffnen, gegebenenfalls an die Symbolleiste anheften.
-5. „Mit Stream Deck koppeln“ aufklappen, Code einfügen, „Koppeln“ betätigen.
-6. „Lokal verbunden“ und das Gerät mit Typ 2 / 8 × 4 müssen erscheinen. Fehlende Profile werden als solche angezeigt.
-7. Für einen reinen BBB-Prototyp optional `config\BBB-Prototyp.json` importieren und speichern. Ansonsten sind alle vier Anfangsregeln vorhanden; noch nicht eingebundene Ziele melden „Profil fehlt“.
+## 3. Wie ein reguläres Plugin installieren
 
-Die Kopplung ist an die konkrete Erweiterungs-Origin gebunden. Eine neue erfolgreiche Kopplung ersetzt die vorherige. Nur ein Edge-Browserprofil gleichzeitig koppeln. InPrivate wird nicht unterstützt. Browsermeldungen über lokales Netzwerk nur für diese Erweiterung entsprechend der IT-Freigabe zulassen; keine Unternehmensrichtlinien abschalten.
+1. Die erzeugte `.streamDeckPlugin`-Datei **doppelklicken**. Die Dateizuordnung muss auf Stream Deck zeigen; bei Rückfrage Stream Deck als Anwendung wählen.
+2. Den Installationsdialog bestätigen. Ein angebotenes Update betrifft ausschließlich die Plugin-ID `de.heki.autoprofile`.
+3. Den Import der eigenen Profilkopien zulassen. Wird die Ersetzung eines Originalprofils angeboten, abbrechen und die exportierte Kopie prüfen.
+4. In Stream Deck ein **neues** Einrichtungsprofil erstellen. Die Aktion „HeKI Auto Profile → Automatik / Kopplung“ darauf platzieren und auswählen.
+5. Einen Kopplungscode im Einstellungsbereich erzeugen; er gilt zwei Minuten.
 
-## 4. Ersten sichtbaren Wechsel prüfen
+Keine CMD-Datei und kein manueller Kopiervorgang in den Pluginordner erforderlich. Das beiliegende `HeKI-AutoProfile-1.0.1-Basis.streamDeckPlugin` wurde mit der offiziellen CLI erstellt. Es dient zur Installation/Verbindungsprüfung **ohne persönliche Profile**. Für BBB das persönliche Paket verwenden; die Basis nicht anschließend darüberinstallieren.
 
-1. Ein neutrales Benutzer-/Startprofil in Stream Deck anzeigen lassen.
-2. Edge in den Vordergrund bringen und `https://bbb.herten.de` öffnen.
-3. Das eingebundene BBB-Testprofil soll erscheinen. Die Edge-Statusanzeige meldet bewusst „Profilbefehl gesendet“, weil das SDK keine Bestätigung des tatsächlich angezeigten Profils liefert.
-4. Einen zweiten BBB-Raum öffnen: kein weiterer Profilbefehl bei unverändertem Ziel.
-5. Zu einer unbekannten Website wechseln: Freigabe des verwalteten Profils wird angefordert.
-6. Outlook öffnen und wieder zu Edge zurückkehren. Die normale Anwendungssteuerung muss in Ihrer Hostversion weiter funktionieren.
+Dies ist ein lokal verteiltes Plugin ohne Marketplace-Prüfung und Marketplace-DRM. Die öffentliche Plugin-API und die von Stream Deck verwaltete Laufzeit bleiben dieselben.
 
-Alle weiteren Fälle stehen im Abnahmeprotokoll. Erst nach bestandener Windows-/Hardwareabnahme regulär einsetzen.
+## 4. Edge-Erweiterung installieren und koppeln
+
+1. `edge://extensions` öffnen, Entwicklermodus aktivieren.
+2. „Entpackte Erweiterung laden“ und `edge-extension` aus dem ZIP wählen.
+3. HeKI über das Erweiterungsmenü öffnen, bei Bedarf anheften.
+4. „Mit Stream Deck koppeln“ aufklappen, Code einfügen, koppeln.
+5. „Lokal verbunden“, SDK-Typ 2 und 8 × 4 müssen erscheinen. Fehlende Profile werden gemeldet.
+6. Optional für einen reinen BBB-Test `config\BBB-Prototyp.json` importieren und speichern. Sonst gelten die vier Anfangsregeln.
+
+Eine neue Kopplung ersetzt die vorherige. Nur ein Edge-Browserprofil gleichzeitig koppeln. InPrivate wird nicht unterstützt. Lokalen Netzwerkzugriff nur entsprechend der IT-Freigabe für diese Erweiterung zulassen; keine Unternehmensrichtlinien umgehen.
+
+## 5. Sichtbaren Wechsel prüfen
+
+Neutrales Startprofil im Host anzeigen, Edge fokussieren und BBB öffnen. Das echte BBB-Testprofil soll erscheinen. Zweiter BBB-Raum: kein zusätzlicher Wechsel. Danach HeKI, unbekannte Website, Outlook und Rückkehr zu Edge prüfen.
+
+Die Anzeige meldet „Profilbefehl gesendet“, weil die SDK-Promise keine Hardwarebestätigung liefert. Alle weiteren Fälle und kritischen Grenzen stehen im Hardware-Abnahmeprotokoll.
+
+Der Hintergrundendpunkt startet im Plugin-Einstiegspunkt. Ob der Host nach Neustart ohne sichtbare Aktion zuverlässig startet, ist auf der verwendeten Version zu prüfen. Alternative: **eigenes neues Startprofil** mit Steueraktion. Die Taste muss für automatische Wechsel nicht gedrückt werden. `Plugin-starten.cmd` sendet einen offiziellen passiven Deep-Link zur Diagnose, garantiert aber keinen universellen Autostart.

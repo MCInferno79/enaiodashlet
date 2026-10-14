@@ -1,7 +1,10 @@
 import { build } from 'esbuild';
 import { cp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { ZipReader, Uint8ArrayReader, Uint8ArrayWriter } from '@zip.js/zip.js';
 import { zipSync } from 'fflate';
+import { noticesFor } from './licenses.mjs';
 const out='dist/de.heki.autoprofile.sdPlugin';
 await rm('dist',{recursive:true,force:true}); await mkdir('dist',{recursive:true});
 await cp('plugin',out,{recursive:true}); await cp('profiles',out+'/profiles',{recursive:true});
@@ -24,3 +27,24 @@ const manifest=JSON.parse(await readFile(out+'/manifest.json','utf8'));
 manifest.Profiles=catalog.map(p=>({Name:p.name,DeviceType:p.deviceType,Readonly:false,AutoInstall:true,DontAutoSwitchWhenInstalled:true}));
 await writeFile(out+'/manifest.json',JSON.stringify(manifest,null,2));
 console.log('Build erstellt: Edge-Erweiterung und Stream-Deck-Plugin. Eingebundene Exportprofile: '+catalog.length);
+// The user's PC does NOT run this build script, npm or the CLI.
+const {version}=JSON.parse(await readFile('package.json','utf8'));
+await writeFile(out+'/THIRD-PARTY-NOTICES.md',await noticesFor(['@elgato/streamdeck','@elgato/utils','@elgato/schemas','ws']));
+await mkdir('dist/no-node',{recursive:true});
+await promisify(execFile)(process.execPath,['node_modules/@elgato/cli/bin/streamdeck.mjs','pack',out,'--output','dist/no-node','--no-update-check','--no-file-list','--force']);
+const official=await readFile('dist/no-node/de.heki.autoprofile.streamDeckPlugin');
+await writeFile(`dist/no-node/HeKI-AutoProfile-${version}-Basis.streamDeckPlugin`,official);
+await rm('dist/no-node/de.heki.autoprofile.streamDeckPlugin');
+await cp('packager','dist/no-node',{recursive:true});
+// Official CLI emits ZIP64 even for tiny files. Read it with the same ZIP library
+// as the CLI, then embed a bounded classic ZIP for the browser's fflate decoder.
+const reader=new ZipReader(new Uint8ArrayReader(new Uint8Array(official)),{useWebWorkers:false});
+const seedEntries={};
+for(const entry of await reader.getEntries())if(!entry.directory)seedEntries[entry.filename]=[await entry.getData(new Uint8ArrayWriter()),{mtime:new Date('2026-01-01T00:00:00Z')}];
+await reader.close();
+const seed=zipSync(seedEntries,{level:6});await writeFile('dist/packager-base.zip',seed);
+await build({entryPoints:['src/packager/ui.ts'],outfile:'dist/no-node/profile-packager.js',bundle:true,format:'iife',platform:'browser',target:'chrome120',define:{HEKI_BASE_PACKAGE:JSON.stringify(Buffer.from(seed).toString('base64'))},legalComments:'linked'});
+for(const file of ['Profile-Paket-erstellen.html','profile-packager.css','profile-packager.js','profile-packager.js.LEGAL.txt']){
+  try{await cp('dist/no-node/'+file,'dist/edge-extension/'+file);}catch(e){if(e.code!=='ENOENT')throw e;}
+}
+console.log('Offizieller .streamDeckPlugin-Installer und lokale Profilvorbereitung ohne Node-Installation erstellt.');

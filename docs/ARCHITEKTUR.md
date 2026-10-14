@@ -59,8 +59,20 @@ Die implementierte unterstützte Alternative für einen **deterministischen Fall
 
 Die Freigabe vor einem anderen Profil kann kurz das Ausgangsprofil anzeigen; ein absolut flackerfreier atomarer Profiltausch samt garantierter Wiederherstellung wird von der verfügbaren API nicht zugesichert. Diese visuelle Eigenschaft ist ebenfalls zu prüfen.
 
+## Installation und Profilvorbereitung ab 1.0.1
+
+Eine separate Node.js-Installation auf dem Dienstrechner entfällt vollständig. Node/npm und die offizielle CLI werden nur auf dem Buildrechner verwendet. `streamdeck pack` erzeugt den Basisinstaller `.streamDeckPlugin`. Endanwender installieren per Doppelklick über Stream Deck und nutzen dessen verwaltete Plugin-Laufzeit.
+
+Die lokale Browserseite erhält ein eingebettetes, bytegleich aus dem offiziellen CLI-Paket abgeleitetes Dateiset. Auf dem Buildrechner wird allein der ZIP-Container normalisiert, weil die CLI ZIP64 auch bei kleinen Dateien erzeugt. Der Browser ergänzt Kopien echter `.streamDeckProfile`-Exporte, einen separaten Katalog und die dokumentierten `Profiles`-Manifesteinträge. Danach lädt er ein neues unverschlüsseltes `.streamDeckPlugin`-ZIP herunter. Er bearbeitet weder das installierte Plugin noch irgendeine laufende Profildatenbank.
+
+Dieses Paketformat wurde gegen die öffentliche CLI-Ausgabe geprüft. Der mit exakt derselben Browserlogik erzeugte Paketinhalt besteht nach dem Entpacken die offizielle CLI-Validierung. Das ist ein Struktur-/Manifestnachweis, keine Behauptung einer realen Windows-Installation oder Marketplace-Signatur. Das persönliche Paket wird ausschließlich von der Stream-Deck-Anwendung importiert. Eine Veröffentlichung im Marketplace ist damit nicht verbunden.
+
+Die Seite liegt sowohl als lokale HTML-Datei im ZIP als auch in der Edge-Erweiterung. Letzteres vermeidet eine Abhängigkeit von erlaubter `file://`-Navigation auf dem Zielrechner. Es gibt keinen zusätzlichen lokalen Vorbereitungsserver im Produkt. Der grafische Browsertest verwendet lediglich einen Testserver für die statischen Dateien, weil diese Cloud-Umgebung lokale Datei-URLs sperrt.
+
 ## Offizielle Quellen
 
+- [Elgato: reguläre Pluginpakete und Distribution](https://docs.elgato.com/streamdeck/sdk/introduction/distribution/)
+- [Elgato: öffentliche CLI-Implementierung](https://github.com/elgatosf/streamdeck/tree/main/packages/cli)
 - [Elgato: Profile erstellen, bündeln und wechseln](https://docs.elgato.com/streamdeck/sdk/guides/profiles/)
 - [Elgato: Manifest und Profilattribute](https://docs.elgato.com/streamdeck/sdk/references/manifest/)
 - [Elgato: SwitchToProfile-WebSocket-Vertrag](https://docs.elgato.com/streamdeck/sdk/references/websocket/plugin/#switchtoprofile)

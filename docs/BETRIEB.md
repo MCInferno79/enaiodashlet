@@ -46,25 +46,29 @@ Beim Trennen des Geräts wird dessen verwalteter Zustand verworfen. Bei erneutem
 4. Vollständige Stream-Deck-Sicherung über die Oberfläche erstellen, wenn auch Drittplugin-Einstellungen gesichert werden sollen.
 5. Exportprofile und JSON an einem vom Administrator freigegebenen Speicherort aufbewahren. Profile können sensible Drittplugin-Aktionssettings enthalten.
 
-## Update
+## Update ohne Node.js
 
-1. Sicherung wie oben durchführen. Beide Pausen aufheben, falls dies für die Freigabe nötig ist, danach wieder pausiert lassen und im Host ein neutrales Profil auswählen. Stream Deck vollständig beenden.
-2. Neues Paket separat entpacken. Die zuletzt exportierten Profilkopien mit dessen `Profile-einbinden.cmd` einbinden. Neue Versionskennungen wie `BBB_v2` vermeiden Mehrdeutigkeiten bei absichtlich geänderten Archivvorlagen; dann die Regelzuordnung ebenfalls ändern.
-3. `Aktualisieren.cmd` ausführen. Es sichert nur den alten eigenen Pluginordner unter `%LOCALAPPDATA%\HeKI-AutoProfile-Backups\backup-...` und kopiert anschließend nur eigene Plugin-Dateien. Keine Profildatenbanken werden bearbeitet.
-4. Stream Deck starten, nötige Importdialoge prüfen. Bearbeitete Profilkopien werden vom Host nicht zwingend mit neuen Paketvorlagen überschrieben; nicht auf ein automatisches Vorlagenupdate vertrauen.
-5. Den neuen `edge-extension`-Inhalt an den bisherigen stabilen Installationsort kopieren; in `edge://extensions` „Neu laden“ wählen. Bei verändertem Erweiterungspfad bzw. ID neu koppeln.
-6. Konfiguration bei Bedarf importieren und speichern. Pause aufheben und den kurzen BBB-/HeKI-/Outlook-Test wiederholen.
+1. Automatik pausieren, bearbeitete Plugin-Profilkopien neu exportieren und Regelkonfiguration sichern. Im Host ein neutrales Startprofil auswählen.
+2. Neues Release-ZIP separat entpacken. `Profile-Paket-erstellen.html` öffnen oder den entsprechenden Link in der aktualisierten Edge-Erweiterung verwenden.
+3. **Alle weiter benötigten Exportprofile** auswählen. Bei Änderungen derselben Version eine höhere Paketrevision verwenden. Neue Profilkennungen wie `BBB_v2` sind sinnvoll, wenn bewusst eine neue Vorlage parallel zur alten eingeführt werden soll; dann die Domainregel entsprechend ändern.
+4. Neues persönliches `.streamDeckPlugin`-Paket erstellen und herunterladen. Per Doppelklick installieren und die Update-/Importdialoge der Stream-Deck-Anwendung prüfen. Keine manuellen Eingriffe in laufende Profildatenbanken.
+5. Edge-Erweiterungsdateien am bisherigen stabilen Ort durch die neuen Dateien ersetzen und unter `edge://extensions` neu laden. Bei geänderter Erweiterungs-ID neu koppeln.
+6. Konfiguration bei Bedarf importieren/speichern, Pause aufheben und BBB-/HeKI-/Outlook-Kurztest wiederholen.
 
-Der Profilassistent verweigert die direkte Bearbeitung eines Stream-Deck-Installationspfads unter `%APPDATA%`. Nur ein Vorbereitungspaket bearbeiten. `Aktualisieren.cmd` verändert ausschließlich den eigenen Pluginordner bei beendetem Stream Deck.
+Die Basispaketdatei enthält keine persönlichen Profile und darf ein personalisiertes Paket nicht als Update ersetzen. Das persönliche Paket ist zugleich eine Sicherung der darin gebündelten Exportvorlagen; spätere Bearbeitungen müssen trotzdem neu exportiert werden. Der Browserassistent speichert keine Profile, daher nach Neuladen alle weiter benötigten Exporte erneut auswählen.
+
+Bearbeitbare importierte Profilkopien werden vom Host nicht zwingend durch neue Archivvorlagen überschrieben. Nicht auf automatische Vorlagenupdates vertrauen. Über die offizielle Oberfläche gezielt eigene Kopien importieren bzw. neue Profilkennungen einsetzen. Originale niemals ersetzen.
 
 ## Wiederherstellung
 
-Stream Deck beenden. Den gesicherten eigenen Pluginordner an seinen bisherigen Ort zurückkopieren. Profile und vollständige Sicherungen ausschließlich über die Stream-Deck-Oberfläche importieren. In Edge die gesicherte Regeldatei importieren und speichern. Ein verlorener Kopplungsschlüssel wird durch eine neue Kopplung ersetzt. Keine Logs oder Schlüssel in Tickets hochladen.
+Vorheriges persönliches `.streamDeckPlugin`-Paket aufbewahren. Bei Rückkehr zur Vorversion die von Stream Deck angebotenen Installations-/Entfernungsdialoge verwenden; je nach Versionsprüfung kann vorher die Entfernung des eigenen Plugins nötig sein. Profile und vollständige Stream-Deck-Sicherungen ausschließlich über die Oberfläche importieren. Regeldatei in Edge importieren und speichern. Verlorene Kopplung durch erneutes Koppeln ersetzen. Keine Schlüssel oder echten Exportarchive in öffentliche Tickets hochladen.
 
 ## Vollständige Deinstallation
 
-1. Automatik pausieren, ein normales Profil in Stream Deck auswählen, anschließend Stream Deck vollständig beenden.
-2. `Deinstallieren.cmd` starten und die Entfernung mit J bestätigen. Es entfernt ausschließlich `de.heki.autoprofile.sdPlugin` und `%APPDATA%\HeKI-AutoProfile` mit lokalen Logs und Kopplung. Kein anderer Pluginordner wird berührt.
-3. Unter `edge://extensions` die HeKI-Erweiterung entfernen. Dies entfernt deren lokale Regeln und Token aus diesem Browserprofil.
-4. Nicht mehr benötigte HeKI-Profilkopien bei Bedarf in der Stream-Deck-Oberfläche löschen. Vorher exportieren, falls sie weiter benötigt werden. Originalprofile und Grafana-Plugin bleiben erhalten.
-5. Das entpackte Paket und nicht mehr benötigte Sicherungen löschen. Es gibt keine Dienste, geplanten Tasks, Registry-Einträge oder Firewallregeln der Lösung zu entfernen.
+1. Automatik pausieren und im Host ein normales Profil auswählen.
+2. Das Plugin „HeKI Auto Profile“ über die Pluginverwaltung von Stream Deck entfernen. Die Bezeichnung des Menüs hängt von der Hostversion ab. Nur die eigene Plugin-ID `de.heki.autoprofile` entfernen; Grafana und andere Plugins bleiben installiert.
+3. Unter `edge://extensions` die HeKI-Erweiterung entfernen. Damit werden deren Regeln und Token aus diesem Browserprofil entfernt.
+4. Nicht benötigte HeKI-Profilkopien bei Bedarf über die Stream-Deck-Oberfläche löschen; vorher exportieren, falls sie weiter benötigt werden. Originalprofile erhalten.
+5. Stream Deck beenden und im Explorer den eigenen Datenordner `%APPDATA%\HeKI-AutoProfile` mit Kopplung/Logs löschen, falls er von der Pluginentfernung nicht entfernt wurde. Anschließend nicht mehr benötigte persönliche Pakete und entpackte Releaseordner löschen.
+
+Es gibt keine HeKI-Dienste, geplanten Tasks, Registry-Einträge, separat installierte Node-Laufzeit oder Firewallregeln zu entfernen. Die von Stream Deck verwaltete Plugin-Laufzeit gehört zur Stream-Deck-Software und wird nicht durch HeKI deinstalliert.

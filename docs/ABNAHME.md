@@ -1,6 +1,6 @@
 # Hardware-Abnahmeprotokoll
 
-Version 1.0.0, Stand 14.10.2026. **Alle Hardwarezeilen sind offen.** Automatisierte Ersatzprüfungen sind im separaten Testbericht beschrieben und ersetzen diese Abnahme nicht.
+Version 1.0.1, Stand 14.10.2026. **Alle Hardwarezeilen sind offen.** Automatisierte Ersatzprüfungen sind im separaten Testbericht beschrieben und ersetzen diese Abnahme nicht.
 
 Rechner/Benutzer: ____________________  Datum: __________
 
@@ -40,8 +40,10 @@ Voraussetzungen: echte duplizierte XL-Profile eingebunden, Kopplung abgeschlosse
 | 26 | Browser hart beenden | Freigabe nach Leaseablauf; tatsächlich sichtbares Profil prüfen | offen |
 | 27 | Geplanter Plugin-/Hostneustart bei neutralem Ausgangsprofil | Keine falsche historische Rückkehr | offen |
 | 28 | Offline ohne Internet | Alle HeKI-Funktionen verfügbar; bereits vorhandene Runtime vorausgesetzt | offen |
-| 29 | Update, Sicherung, Wiederherstellung, Deinstallation | Nur eigener Pluginordner betroffen, Originale erhalten | offen |
+| 29 | Installation ohne systemweites Node, Update, Sicherung, Wiederherstellung, Deinstallation | Nur eigener Pluginordner betroffen, Originale erhalten | offen |
 | 30 | Wechsel BBB ↔ HeKI beobachten | Visuelles Verhalten akzeptabel; Freigabe-/Wechselpaar kann Zwischenprofil zeigen | offen |
+
+Zusätzlich die lokale Profilvorbereitung (Dateiauswahl → Download → Doppelklickinstallation) ohne Node/npm testen; die Exportarchive dürfen nicht verändert werden. Falls file:// gesperrt ist, den Link in der Erweiterung verwenden.
 
 Kritische Fälle 7, 23/24 und 30 müssen auf der eingesetzten Hostversion bestanden bzw. mit der beschriebenen unterstützten Alternative abgedeckt sein. Ein automatisierter Test des gesendeten Befehls genügt hierfür nicht. Bei nicht erfüllbarer Outlook-Übergabe oder nicht akzeptablem Flackern keine Produktionsfreigabe; diese Grenzen kann die öffentliche API nicht beliebig aufheben.
 

@@ -1,47 +1,46 @@
 # HeKI Stream Deck Auto Profile Switcher
 
-Version 1.0.0 – **implementierter Abnahmekandidat für Windows / Stream Deck XL**, Stand 14.10.2026.
+Version **1.0.1** – Installation und Profilvorbereitung **ohne separate Node.js-Installation**, Stand 14.10.2026. Abnahmekandidat für Windows und Stream Deck XL.
 
-## Fertiges ZIP herunterladen
+## Herunterladen
 
-**[HeKI-AutoProfile-1.0.0.zip direkt herunterladen](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.0.zip)** (ca. 711 KiB)
+- **[Komplettes ZIP 1.0.1 herunterladen](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.1.zip)** – Edge-Erweiterung, lokale grafische Profilvorbereitung, Installationspaket und deutsches Handbuch.
+- [Basis-Plugin als .streamDeckPlugin](https://github.com/MCInferno79/enaiodashlet/raw/refs/heads/codex/heki-autoprofile-1.0.0/downloads/HeKI-AutoProfile-1.0.1-Basis.streamDeckPlugin) – offizielles CLI-Paket, per Doppelklick installierbar. Enthält noch keine persönlichen Exportprofile; allein damit erfolgt noch kein BBB-Profilwechsel.
+- [SHA-256-Prüfsumme des ZIPs](downloads/HeKI-AutoProfile-1.0.1.zip.sha256)
 
-Alternativ [die ZIP-Datei auf GitHub öffnen](downloads/HeKI-AutoProfile-1.0.0.zip) und **Download raw file** betätigen.
+## Auf dem Dienstrechner
 
-Das ZIP vollständig entpacken und darin **START-HIER.html** öffnen. Es enthält die fertig gebaute Edge-Erweiterung, das Stream-Deck-Plugin, die CMD-Assistenten und das deutsche Handbuch. Für die Installation dieses vorbereiteten Pakets ist kein npm-Build nötig. Für den ersten sichtbaren BBB-Wechsel muss eine in Stream Deck exportierte XL-Profilkopie mit dem Assistenten eingebunden werden.
+**Weder Node.js noch npm, PowerShell oder ein zusätzlicher Dienst müssen installiert werden.** Das Plugin nutzt die von Stream Deck selbst verwaltete Plugin-Laufzeit, wie andere Node-basierte Stream-Deck-Plugins. Stream Deck ab 7.1 mit verfügbarer Node.js-24-Plugin-Laufzeit ist Voraussetzung; für einen Offline-Einsatz muss diese bereits bereitgestellt sein.
 
-[SHA-256-Prüfsumme](downloads/HeKI-AutoProfile-1.0.0.zip.sha256) · [Installationsanleitung](docs/INSTALLATION.md) · [Testbericht und offene Hardwareabnahme](docs/TESTBERICHT.md)
+1. ZIP vollständig in einen stabilen lokalen Ordner entpacken und `START-HIER.html` lesen.
+2. Eine **Kopie** des BBB-Profils in Stream Deck als `.streamDeckProfile` exportieren. Originalprofile unverändert lassen.
+3. `Profile-Paket-erstellen.html` in Edge öffnen. Alternativ zuerst die Erweiterung aus `edge-extension` unter `edge://extensions` entpackt laden und in ihren Einstellungen den Link **„Eigene Exportprofile ohne Node.js …“** öffnen.
+4. BBB-Export auswählen, Kennung `BBB` und Gerätetyp `Stream Deck XL` beibehalten, **Installationspaket erstellen** und herunterladen.
+5. Die erzeugte **`.streamDeckPlugin`-Datei doppelklicken**. Stream Deck übernimmt Installation und Import der Profilkopien.
+6. Edge-Erweiterung laden, falls noch nicht geschehen. In einem neuen Einrichtungsprofil die Aktion „Automatik / Kopplung“ platzieren, Code erzeugen und in Edge koppeln.
 
-Die Edge-Erweiterung erkennt die URL des aktiven Tabs im fokussierten Edge-Fenster. Ein lokales Plugin schaltet über das offizielle Elgato-SDK auf ein mitgeliefertes Profil um. Die initialen Regeln für BBB, HeKI, HeKI/Grafana und Speakr sind über die deutsche Oberfläche änderbar.
+Die Profilvorbereitung läuft vollständig lokal im Browser. Sie kopiert ausgewählte Exportarchive bytegleich und erstellt ein neues Pluginpaket. Es findet kein Upload statt. Persönliche Pakete können sensible Drittplugin-Settings enthalten und gehören nicht in dieses öffentliche Repository.
 
-**Für einen sichtbaren BBB-Profilwechsel muss zuerst ein echtes, in Stream Deck exportiertes XL-Profil eingebunden werden. Solche Benutzerexporte wurden nicht bereitgestellt und sind daher nicht im Paket enthalten.** Der Assistent kopiert die Dateien unverändert. Es werden keine Profile anhand undokumentierter interner Formate erzeugt.
+Die Regelverwaltung unterstützt BBB, HeKI, Grafana, Speakr und eigene Websites, Hostnamen, Subdomains, Pfade, Prioritäten, Geräteauswahl, Pause sowie Konfigurationsimport/-export. Das offizielle SDK kann nur mitgelieferte Pluginprofile aktivieren; deshalb ist die Einbindung echter Exportprofile erforderlich.
 
-16 automatisierte Tests, TypeScript, Build und offizielle Elgato-Manifestprüfung bestanden. Eine echte lokale HTTP-/SDK-WebSocket-Kette ist getestet; Browserereignisse und Stream-Deck-Host sind dabei simuliert. Die Optionsoberfläche wurde in Chromium geprüft. Das Laden einer tatsächlichen Erweiterung ist in der Entwicklungsumgebung durch eine Administrationsrichtlinie blockiert. **Der reale Windows-/Edge-/XL-Test und die Outlook-Profilfreigabe stehen aus. Keine Behauptung einer abgeschlossenen Produktionsabnahme.**
+## Nachweis und Grenzen
 
-## Installation
+19 automatisierte Tests sowie Build und offizielle Elgato-Validierung bestehen. Der personalisierte Paketaufbau wurde nach dem Entpacken ebenfalls durch die offizielle CLI validiert. Die grafische Profilvorbereitung wurde mit Auswahl, Download und unveränderter Archivkopie in Chromium geprüft; dafür diente ein statischer Testserver. Das direkte Öffnen lokaler Dateien und das Laden von Erweiterungen sind in dieser Entwicklungsumgebung administrativ gesperrt. Beide Wege müssen auf dem freigegebenen Windows-Rechner geprüft werden.
 
-Im Release-Paket `START-HIER.html` öffnen. Vollständige Schritte stehen in [docs/INSTALLATION.md](docs/INSTALLATION.md).
+Die echte Windows-/Edge-/XL-Abnahme und besonders die Übergabe an Outlook bleiben offen. Das SDK bestätigt nur den Versand eines Profilbefehls, nicht das sichtbar aktive Profil. Das Paket ist kein im Marketplace veröffentlichtes oder durch Elgato geprüftes Produkt.
 
-1. In Stream Deck eine Kopie des BBB-Profils für XL erstellen und diese exportieren.
-2. `Profile-einbinden.cmd` starten, Exportdatei wählen, Kennung `BBB`, Gerätetyp `2` verwenden.
-3. Stream Deck vollständig beenden; `Installieren.cmd` ausführen.
-4. `edge://extensions` → Entwicklermodus → Entpackte Erweiterung laden → `edge-extension`.
-5. In einem neuen Einrichtungsprofil die Aktion „Automatik / Kopplung“ platzieren, Code erzeugen, in Edge koppeln.
-6. BBB öffnen und [Hardware-Abnahme](docs/ABNAHME.md) durchführen.
+## Nur für Entwickler / Buildrechner
 
-Für die Profilvorbereitung wird Node.js ab 22 benötigt. Für den Betrieb verwendet das Plugin die von Stream Deck bereitgestellte Node.js-24-Laufzeit. Diese muss vor einem vollständig offline durchgeführten Einsatz bereits vorhanden sein. Keine PowerShell, kein Windows-Dienst, keine Cloud-Verbindung der Lösung.
-
-## Entwicklung
+Diese Kommandos laufen auf dem Buildrechner, **nicht auf dem Dienstrechner des Anwenders**:
 
 ```cmd
 npm ci
-npm run check
-npm run build
-npm test
-npm run validate
+npm run verify
+npm run test:ui
+npm run test:packager
 npm run release
 ```
 
-`npm run test:ui` prüft die UI als lokale Webseite mit simuliertem `chrome.*`. `npm run test:browser` lädt die tatsächliche Erweiterung in einen freigegebenen Chromium-Testbrowser; `HEKI_BROWSER_PATH` kann auf dessen ausführbare Datei zeigen. Aktuelle gebrandete Chrome-/Edge-Versionen unterstützen die zum Test verwendeten Sideload-Flags teils nicht; das ist unabhängig vom manuellen Laden über `edge://extensions`.
+Buildvoraussetzung: Node.js ab 22. Exakte Versionen stehen im Lockfile. SDK und Laufzeitabhängigkeiten werden ins Plugin gebündelt. `streamdeck pack` der offiziellen Elgato-CLI erzeugt den Basisinstaller. Die Browserseite ergänzt daraus ein neues, unverschlüsseltes lokales ZIP-Installationspaket; installiert wird ausschließlich über Stream Deck. Keine laufenden Profildatenbanken werden bearbeitet.
 
-Details: [Architektur und offizielle Quellen](docs/ARCHITEKTUR.md), [Betrieb](docs/BETRIEB.md), [Sicherheit](docs/SICHERHEIT.md), [Fehlersuche](docs/FEHLERSUCHE.md), [Testbericht](docs/TESTBERICHT.md).
+[Installation](docs/INSTALLATION.md) · [Architektur](docs/ARCHITEKTUR.md) · [Betrieb und Update](docs/BETRIEB.md) · [Sicherheit](docs/SICHERHEIT.md) · [Fehlersuche](docs/FEHLERSUCHE.md) · [Hardware-Abnahme](docs/ABNAHME.md) · [Testbericht](docs/TESTBERICHT.md)

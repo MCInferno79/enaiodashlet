@@ -36,6 +36,15 @@ HTTP ohne TLS wird bewusst auf den lokalen Rechner begrenzt. Origin ist keine Pr
 | `service.log` / `.1` | Zeitstempel und feste Ereigniscodes; Rotation ab ca. 256 KiB je aktuelle Datei |
 | Eigener Pluginordner | Unveränderte Exportarchive, Katalog und Binärbundle; mögliche sensible Drittplugin-Settings im Benutzerexport |
 
-Installer setzt für den eigenen Datenordner ein Windows-ACL für aktuellen Benutzer und SYSTEM. `mode: 0600` allein ist unter Windows kein ausreichender ACL-Ersatz. Bei manueller Installation muss die IT diesen Zugriffsschutz selbst setzen. SDK-Logging wird auf Fehler begrenzt, damit Registrierung und Property-Inspector-Nachrichten nicht als Debug-/Trace-Dump aufgezeichnet werden. Eigene Logs enthalten keine Requestbodies, Domainnamen, Gerätnamen, Konferenzräume, URL-Parameter, Codes oder Token.
+Bei regulärer .streamDeckPlugin-Installation wird der eigene Datenordner im Benutzerprofil angelegt und erbt dessen Windows-Zugriffsschutz. Die frühere explizite ACL-Einrichtung per CMD ist dafür keine Voraussetzung mehr. `mode: 0600` allein setzt unter Windows keine vollständige ACL; die IT muss bei abweichenden oder gemeinsam genutzten Profilberechtigungen den Zugriff auf Kopplungsdaten absichern. SDK-Logging wird auf Fehler begrenzt, damit Registrierung und Property-Inspector-Nachrichten nicht als Debug-/Trace-Dump aufgezeichnet werden. Eigene Logs enthalten keine Requestbodies, Domainnamen, Gerätnamen, Konferenzräume, URL-Parameter, Codes oder Token.
 
 Die vollständige aktive URL wird nur kurzfristig im Browser zur Zuordnung verwendet. Übertragen werden Fokus, technische Zielkennung, Pause, Gerätefilter, Instanz und Sequenz. Ein JSON-Konfigurationsexport schließt Token aus. Trotzdem kann der Administrator selbst sensible Angaben in frei wählbare Regeln schreiben; das muss bei der Konfiguration vermieden werden.
+
+
+## Lokale Profilvorbereitung ohne Node-Installation
+
+Die HTML-/Erweiterungsseite enthält ihre Skripte und Kompressionsbibliothek im Paket. Ihre CSP setzt `connect-src` auf `none`; sie verwendet weder Fetch noch Upload-Endpunkte. Nur vom Benutzer ausgewählte Dateien werden über die Browser-Dateischnittstelle gelesen. Profile bleiben opake ZIP-Archive und werden unverändert übernommen, einschließlich ihrer Drittplugin-Aktionssettings.
+
+Dateityp, Dateisignatur, Größen, Profilkennungen, Gerätetypen, Duplikate und Paketrevision werden geprüft. Maximal 32 Profile mit je 50 MiB / insgesamt 100 MiB. Das eingebettete Basisarchiv besitzt zusätzliche Entpackgrößengrenzen. ZIP64-Ausgaben der offiziellen CLI werden auf dem Buildrechner verlustfrei für die Browserbibliothek normalisiert; unbeschränkte 32-Bit-Größenplatzhalter werden im Browser nicht als Puffergröße akzeptiert. Die Version des neuen Pakets wird durch eine explizite Revision erhöht.
+
+Die Seite speichert nur die letzte Revisionszahl lokal. Exportinhalte und Dateinamen werden nicht dauerhaft gespeichert oder übertragen. Die erzeugte `.streamDeckPlugin`-Datei enthält die persönlichen Profilarchive und ist entsprechend vertraulich zu behandeln. Die Software veröffentlicht sie nicht nach GitHub. Der öffentlich bereitgestellte Basisinstaller enthält keine Benutzerexporte.

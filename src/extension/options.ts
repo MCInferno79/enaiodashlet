@@ -29,7 +29,7 @@ function drawRules() {
     for (const child of [enabled, name, pattern, profile, priority, remove]) { const td = document.createElement("td"); td.append(child); tr.append(td); }
     tbody.append(tr);
   });
-  el("missing").textContent = "Die Profilauswahl enthält ausschließlich eingebundene Exportprofile. Weitere Profile mit Profile-einbinden.cmd ergänzen und das Plugin neu installieren.";
+  el("missing").textContent = "Die Profilauswahl enthält ausschließlich eingebundene Exportprofile. Weitere Profile mit Profile-Paket-erstellen.html lokal ergänzen und das erzeugte Installationspaket öffnen.";
 }
 function drawDevices() {
   const select = el<HTMLSelectElement>("device-select"); select.replaceChildren(option("*", "Alle passenden Geräte"));
